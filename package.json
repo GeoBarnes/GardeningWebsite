@@ -18,7 +18,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/a11y",
-    "test:lighthouse": "lhci autorun"
+    "test:lighthouse": "lhci autorun",
+    "test:all": "npm run check && npm run lint && npm run format:check && npm test && npm run build && npm run test:e2e"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

@@ -30,6 +30,8 @@ npm run test:e2e           # playwright — builds, previews, runs tests/**
 npm run test:a11y          # axe sweep only
 npx playwright test tests/e2e/navigation.spec.ts
 npm run test:lighthouse    # lhci against ./dist (requires a prior build)
+
+npm run test:all           # the whole blocking CI chain, in CI's order
 ```
 
 Node 22.12+ is required and pinned in `.node-version`; fnm auto-switches in this repo.
@@ -41,6 +43,18 @@ Node 22.12+ is required and pinned in `.node-version`; fnm auto-switches in this
 **Content collections.** The zod schema for portfolio projects lives in [src/content/schema.ts](src/content/schema.ts), deliberately extracted from [content.config.ts](src/content.config.ts) so it can be unit-tested in isolation while remaining the exact object the build enforces. Markdown files in [src/content/projects/](src/content/projects/) are globbed; their filename becomes the `id` used by the dynamic route [portfolio/[id].astro](src/pages/portfolio/[id].astro). Bad frontmatter fails at `astro build`.
 
 **Design tokens.** Colors and fonts are Tailwind 4 `@theme` tokens in [src/styles/global.css](src/styles/global.css) (`forest`, `earth`, `font-display`, `font-body`) — there is no `tailwind.config.js`. Changing the palette is a single-file edit; never hardcode hex values in components.
+
+## When to run the tests while making changes
+
+Match the layer to what you touched — don't reach for the browser suite on a one-line copy edit, and don't skip it after changing routing.
+
+- **While editing:** keep `npm run test:watch` running for save-on-change unit feedback. The browser layers are too slow for that loop.
+- **Changed a component, page, or the schema:** `npm test`. Add `npm run test:e2e` if you touched routing, nav, the contact form, or markup structure.
+- **Changed styling, colours, or the `@theme` tokens:** re-run `npm run test:a11y`. Contrast regressions only surface there — this already caught a real WCAG AA failure in the placeholder palette.
+- **Added a route:** add it to [tests/fixtures/routes.ts](tests/fixtures/routes.ts) _and_ `navLinks` in BaseLayout, then `npm run test:e2e`. Skipping the fixture silently loses smoke + a11y coverage for that page.
+- **Added a component:** co-locate a `*.test.ts` beside it in the same commit.
+- **Touched images, fonts, or client-side scripts:** `npm run build && npm run test:lighthouse` — these are the changes that move perf scores.
+- **Before committing:** `npm run test:all`. It runs the same steps in the same order as the blocking CI job, so a green run locally means a green run in CI. If `format:check` fails, `npm run format` fixes it.
 
 ## Testing conventions
 
