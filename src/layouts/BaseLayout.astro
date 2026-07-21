@@ -33,13 +33,62 @@ const navLinks = [
   </head>
   <body class="min-h-screen flex flex-col bg-white font-body text-forest">
     <header class="border-b border-earth-light/40">
-      <nav class="max-w-5xl mx-auto flex items-center justify-between px-6 py-4">
-        <a href="/" class="font-display text-xl text-forest">Placeholder Gardening Co.</a>
-        <ul class="flex gap-6 text-sm">
+      <nav class="max-w-5xl mx-auto px-6 py-4" aria-label="Main">
+        <div class="flex items-center justify-between">
+          <a href="/" class="font-display text-xl text-forest">Placeholder Gardening Co.</a>
+
+          <!-- Desktop links: the whole list inline, from `sm` up. -->
+          <ul class="hidden sm:flex gap-6 text-sm">
+            {
+              navLinks.map((link) => (
+                <li>
+                  <a href={link.href} class="hover:text-forest-light transition-colors">
+                    {link.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+
+          <!--
+            Mobile toggle. `aria-expanded` is the state contract screen readers
+            read; `aria-controls` ties it to the panel. Both are kept in sync by
+            the script below. 44px min touch target per WCAG 2.5.5.
+          -->
+          <button
+            type="button"
+            id="nav-toggle"
+            class="sm:hidden -mr-2 p-2 min-w-11 min-h-11 flex items-center justify-center"
+            aria-expanded="false"
+            aria-controls="nav-menu"
+            aria-label="Menu"
+          >
+            <svg
+              class="w-6 h-6"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!--
+          Mobile panel. Hidden via the `hidden` attribute rather than a class so
+          it is genuinely removed from the accessibility tree when closed, not
+          merely invisible.
+        -->
+        <ul id="nav-menu" hidden class="sm:hidden flex flex-col gap-1 pt-4 text-sm">
           {
             navLinks.map((link) => (
               <li>
-                <a href={link.href} class="hover:text-forest-light transition-colors">
+                <a href={link.href} class="block py-3 hover:text-forest-light transition-colors">
                   {link.label}
                 </a>
               </li>
@@ -61,5 +110,41 @@ const navLinks = [
         <p>Serving [service area] &middot; hello@example.com &middot; 07000 000000</p>
       </div>
     </footer>
+
+    <script>
+      // The site's only always-present JS: a few hundred bytes to toggle the
+      // mobile nav. Everything else stays zero-JS unless a page opts in.
+      const toggle = document.getElementById('nav-toggle');
+      const menu = document.getElementById('nav-menu');
+
+      if (toggle && menu) {
+        const setOpen = (open: boolean) => {
+          menu.hidden = !open;
+          toggle.setAttribute('aria-expanded', String(open));
+        };
+
+        // `hidden` types as `boolean | string` (the `until-found` value), so
+        // coerce rather than pass it straight through.
+        toggle.addEventListener('click', () => {
+          setOpen(Boolean(menu.hidden));
+        });
+
+        // Escape closes and returns focus to the toggle — otherwise keyboard
+        // users are stranded inside an open panel.
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && !menu.hidden) {
+            setOpen(false);
+            toggle.focus();
+          }
+        });
+
+        // Crossing the `sm` breakpoint with the panel open would otherwise
+        // leave a stale `hidden` state behind when the desktop list takes over.
+        const desktop = window.matchMedia('(min-width: 40rem)');
+        desktop.addEventListener('change', (event) => {
+          if (event.matches) setOpen(false);
+        });
+      }
+    </script>
   </body>
 </html>
