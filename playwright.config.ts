@@ -17,7 +17,14 @@ export default defineConfig({
     baseURL,
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // Two viewports, because layout-dependent behaviour (the nav collapsing to a
+  // hamburger, touch targets, reflow) is invisible to a desktop-only run.
+  // Specs that only make sense at one width guard themselves with the project
+  // name — see tests/e2e/mobile-nav.spec.ts.
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'mobile', use: { ...devices['Pixel 7'] } },
+  ],
   webServer: {
     command: process.env.CI ? 'npm run preview' : 'npm run build && npm run preview',
     url: baseURL,

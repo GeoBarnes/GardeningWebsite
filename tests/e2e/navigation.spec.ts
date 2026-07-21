@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('site navigation', () => {
-  test('primary nav links reach the right pages', async ({ page }) => {
+  // Below `sm` the inline list is replaced by the hamburger panel, which has
+  // its own spec — see tests/e2e/mobile-nav.spec.ts.
+  test('primary nav links reach the right pages', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'inline nav list is collapsed into the hamburger menu');
     await page.goto('/');
     const nav = page.locator('header nav');
 
