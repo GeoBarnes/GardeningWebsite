@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('contact form', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/contact');
+    await page.goto('/contact/');
   });
 
   // These field names are the contract with Formspree (Phase 6). If someone

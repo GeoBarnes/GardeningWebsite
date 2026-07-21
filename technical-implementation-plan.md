@@ -235,7 +235,16 @@ Phases 1–3 are built and verified (`npm run build` succeeds, all routes return
 - Four routes: `/` (Home), `/portfolio` (grid pulling from the collection) with `/portfolio/[id]` detail pages, `/about`, `/contact` (Formspree-shaped form, not yet wired to a real endpoint, plus a honeypot field and plain-text phone/email fallback), and a custom `/404`.
 - All imagery is `placehold.co` placeholder boxes — swap for real photos in Phase 7.
 
-Not yet built: the before/after slider, lightbox, mobile nav toggle, Motion One scroll-reveal, View Transitions, real Formspree endpoint, JSON-LD/SEO tags, sitemap, and deployment (Phase 4 — connecting to Cloudflare Pages needs your hosting account, so that's a good next step whenever you're ready).
+**Phase 4 is done** — the site is live at [gardening-website.pages.dev](https://gardening-website.pages.dev), auto-deploying from `main` via Cloudflare Pages. All routes verified against the deployed build, including the custom 404.
+
+Two follow-ups landed alongside it:
+
+- `trailingSlash: 'always'` in `astro.config.mjs`, with every internal link updated to match. Cloudflare serves directory-style output and was 308-redirecting each unslashed path; emitting the canonical form removes a round-trip per navigation. Note the knock-on: under this setting `astro preview` answers unslashed unknown paths with its _own_ 404 rather than ours, so `tests/e2e/not-found.spec.ts` requests the slashed form (Cloudflare serves ours either way — verified live).
+- **Phase 5 has started**: the before/after slider is built (`src/components/BeforeAfterSlider.astro`), using the `img-comparison-slider` web component, rendering on any project whose frontmatter has a `beforeAfter` block. Its ~11KB of JS is scoped to the component, so it ships only on project detail pages — covered by a test that asserts exactly that.
+
+Still to build: lightbox, mobile nav toggle, testimonial block (rest of Phase 5), Motion One scroll-reveal, View Transitions, real Formspree endpoint (Phase 6 — needs an endpoint URL), JSON-LD/SEO tags, sitemap, real photos and copy.
+
+**Known perf note:** the project detail pages score 0.87 against a 0.9 performance budget (warn-level, non-blocking). The cause is not the slider — total blocking time is 0ms. It is the render-blocking Google Fonts stylesheet (~874ms) and `placehold.co` images serving as the LCP element. Both resolve naturally in Phase 7 when real, locally-optimised images land and the fonts can be self-hosted.
 
 To run it locally: `npm run dev`, then visit `http://localhost:4321`.
 

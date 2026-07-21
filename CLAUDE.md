@@ -42,6 +42,10 @@ Node 22.12+ is required and pinned in `.node-version`; fnm auto-switches in this
 
 **Content collections.** The zod schema for portfolio projects lives in [src/content/schema.ts](src/content/schema.ts), deliberately extracted from [content.config.ts](src/content.config.ts) so it can be unit-tested in isolation while remaining the exact object the build enforces. Markdown files in [src/content/projects/](src/content/projects/) are globbed; their filename becomes the `id` used by the dynamic route [portfolio/[id].astro](src/pages/portfolio/[id].astro). Bad frontmatter fails at `astro build`.
 
+**Trailing slashes are mandatory on internal links.** `astro.config.mjs` sets `trailingSlash: 'always'` to match how Cloudflare Pages serves directory output. Every internal `href` must end in `/` (`/about/`, not `/about`), including the paths in [tests/fixtures/routes.ts](tests/fixtures/routes.ts). An unslashed link still works but costs a 308 redirect.
+
+**Client-side JS is per-component.** A `<script>` in an `.astro` component is bundled and shipped only on pages that render it — that is how the zero-JS-by-default promise survives adding interactivity. [BeforeAfterSlider.astro](src/components/BeforeAfterSlider.astro) is the reference example, and [before-after-slider.spec.ts](tests/e2e/before-after-slider.spec.ts) asserts its bundle does _not_ leak onto the home page. Keep that assertion pattern for future islands.
+
 **Design tokens.** Colors and fonts are Tailwind 4 `@theme` tokens in [src/styles/global.css](src/styles/global.css) (`forest`, `earth`, `font-display`, `font-body`) — there is no `tailwind.config.js`. Changing the palette is a single-file edit; never hardcode hex values in components.
 
 ## When to run the tests while making changes
