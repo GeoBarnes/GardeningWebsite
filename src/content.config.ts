@@ -1,17 +1,10 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { projectSchema } from './content/schema';
 
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
-  schema: z.object({
-    title: z.string(),
-    summary: z.string(),
-    images: z.array(z.string()),
-    beforeAfter: z
-      .object({ before: z.string(), after: z.string() })
-      .optional(),
-    date: z.coerce.date(),
-  }),
+  schema: projectSchema,
 });
 
 export const collections = { projects };

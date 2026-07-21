@@ -1,0 +1,11 @@
+dist/
+.astro/
+node_modules/
+playwright-report/
+test-results/
+lighthouse-report/
+.lighthouseci/
+package-lock.json
+
+# Hand-authored planning doc — left in the author's own style
+website-development-plan.md

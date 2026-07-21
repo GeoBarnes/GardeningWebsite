@@ -3,6 +3,12 @@ dist/
 # generated types
 .astro/
 
+# test & CI artifacts
+playwright-report/
+test-results/
+lighthouse-report/
+.lighthouseci/
+
 # dependencies
 node_modules/
 

@@ -6,10 +6,7 @@ interface Props {
   description?: string;
 }
 
-const {
-  title,
-  description = "Friendly, experienced garden design and maintenance.",
-} = Astro.props;
+const { title, description = 'Friendly, experienced garden design and maintenance.' } = Astro.props;
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -39,13 +36,15 @@ const navLinks = [
       <nav class="max-w-5xl mx-auto flex items-center justify-between px-6 py-4">
         <a href="/" class="font-display text-xl text-forest">Placeholder Gardening Co.</a>
         <ul class="flex gap-6 text-sm">
-          {navLinks.map((link) => (
-            <li>
-              <a href={link.href} class="hover:text-forest-light transition-colors">
-                {link.label}
-              </a>
-            </li>
-          ))}
+          {
+            navLinks.map((link) => (
+              <li>
+                <a href={link.href} class="hover:text-forest-light transition-colors">
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
         </ul>
       </nav>
     </header>
@@ -55,7 +54,9 @@ const navLinks = [
     </main>
 
     <footer class="border-t border-earth-light/40 mt-16">
-      <div class="max-w-5xl mx-auto px-6 py-8 text-sm text-forest/70 flex flex-col sm:flex-row justify-between gap-2">
+      <div
+        class="max-w-5xl mx-auto px-6 py-8 text-sm text-forest/80 flex flex-col sm:flex-row justify-between gap-2"
+      >
         <p>&copy; {new Date().getFullYear()} Placeholder Gardening Co.</p>
         <p>Serving [service area] &middot; hello@example.com &middot; 07000 000000</p>
       </div>

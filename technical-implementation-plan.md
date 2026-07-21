@@ -10,17 +10,17 @@ Confirmed on this machine already: git configured. One prerequisite came up duri
 
 ## Tech stack at a glance
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Framework | **Astro** | Static site generator; ships zero JS by default, only hydrates interactive bits you mark explicitly |
-| Styling | **Tailwind CSS** | Utility-class CSS, no separate stylesheet to maintain |
-| Content | **Markdown/MDX + Astro Content Collections** | Type-checked content (bio, portfolio entries) as files in the repo, no CMS/database |
-| Language | **TypeScript** (light touch) | Used for content schemas and component props; you can write plain JS in `.astro` frontmatter if you'd rather skip types |
-| Interactivity | **Vanilla JS / small islands**, optional **Motion One** | Mobile nav, lightbox, before/after slider, scroll-reveal — only where truly needed |
-| Structured data | **JSON-LD** (plain JSON in a `<script>` tag) | LocalBusiness schema for local SEO |
-| Forms | **Formspree** (or Resend + Cloudflare Function later) | Handles form submissions with zero backend code |
-| Hosting | **Cloudflare Pages** | Free, auto-deploys on git push, free HTTPS |
-| Version control | **Git + GitHub** | Already initialised in this repo |
+| Layer           | Technology                                              | Purpose                                                                                                                 |
+| --------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Framework       | **Astro**                                               | Static site generator; ships zero JS by default, only hydrates interactive bits you mark explicitly                     |
+| Styling         | **Tailwind CSS**                                        | Utility-class CSS, no separate stylesheet to maintain                                                                   |
+| Content         | **Markdown/MDX + Astro Content Collections**            | Type-checked content (bio, portfolio entries) as files in the repo, no CMS/database                                     |
+| Language        | **TypeScript** (light touch)                            | Used for content schemas and component props; you can write plain JS in `.astro` frontmatter if you'd rather skip types |
+| Interactivity   | **Vanilla JS / small islands**, optional **Motion One** | Mobile nav, lightbox, before/after slider, scroll-reveal — only where truly needed                                      |
+| Structured data | **JSON-LD** (plain JSON in a `<script>` tag)            | LocalBusiness schema for local SEO                                                                                      |
+| Forms           | **Formspree** (or Resend + Cloudflare Function later)   | Handles form submissions with zero backend code                                                                         |
+| Hosting         | **Cloudflare Pages**                                    | Free, auto-deploys on git push, free HTTPS                                                                              |
+| Version control | **Git + GitHub**                                        | Already initialised in this repo                                                                                        |
 
 ---
 
@@ -31,20 +31,25 @@ Confirmed on this machine already: git configured. One prerequisite came up duri
 ```bash
 npm create astro@latest -- --template minimal --typescript strict
 ```
+
 This scaffolds into the repo root. Note: `create-astro` refuses to scaffold directly into a non-empty directory, and this repo already had planning docs in it — the workaround was scaffolding into a throwaway temp folder, then copying the generated `src/`, `public/`, `astro.config.mjs`, `tsconfig.json`, `package.json`, and `.gitignore` into the repo root (skipping its auto-generated `README.md`/`AGENTS.md` since this repo already had its own docs).
 
 Then add Tailwind as an Astro integration — this wires up the build config automatically:
+
 ```bash
 npx astro add tailwind
 ```
 
 Run it locally:
+
 ```bash
 npm run dev
 ```
+
 This gives you a hot-reloading dev server, typically at `localhost:4321`.
 
 **File structure you'll end up with:**
+
 ```
 src/
   pages/        → each file = a route (index.astro → "/")
@@ -66,8 +71,9 @@ tailwind.config.mjs
 **Goal:** one shared layout so every page has consistent nav/footer/meta, with placeholder brand colours and fonts you can swap later without touching pages.
 
 Tailwind v4 (what `npx astro add tailwind` installs today) configures theme tokens in CSS rather than a `tailwind.config.mjs` file. In `src/styles/global.css`:
+
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --color-forest: #2f4a3d;
@@ -75,10 +81,11 @@ Tailwind v4 (what `npx astro add tailwind` installs today) configures theme toke
   --color-earth: #8a7a63;
   --color-earth-light: #b5a58c;
 
-  --font-display: "Fraunces", serif;   /* placeholder — swap for whatever suits her brand */
-  --font-body: "Inter", sans-serif;
+  --font-display: 'Fraunces', serif; /* placeholder — swap for whatever suits her brand */
+  --font-body: 'Inter', sans-serif;
 }
 ```
+
 Each `--color-*`/`--font-*` variable automatically becomes a utility class (`bg-forest`, `text-forest-light`, `font-display`, etc.) — no separate config file to keep in sync. Pull the fonts from Google Fonts via a `<link>` in the layout `<head>`, or self-host later for performance.
 
 Build `src/layouts/BaseLayout.astro`: accepts a `title`/`description` prop, renders `<head>` meta tags, a `<nav>` (Home/Portfolio/About/Contact links), a `<slot />` for page content, and a `<footer>`. Every page wraps itself in this layout.
@@ -96,6 +103,7 @@ Create `src/pages/index.astro`, `portfolio.astro`, `about.astro`, `contact.astro
 For the portfolio, set up a **Content Collection** so each project is a structured file rather than hardcoded HTML:
 
 `src/content.config.ts` (current Astro versions use this project-root path with an explicit loader, rather than the older `src/content/config.ts` convention):
+
 ```ts
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
@@ -113,6 +121,7 @@ const projects = defineCollection({
 
 export const collections = { projects };
 ```
+
 Then each project is a Markdown file in `src/content/projects/`, e.g. `oak-lane-border.md`, with frontmatter matching that schema and a body for extended notes. At prototype stage, create 2–3 dummy entries with placeholder images (free stock photos, or plain grey boxes) so the gallery loop has something to render. Fetch them in a page with `getCollection('projects')` from `astro:content`.
 
 The `about.astro` page can start with lorem-ipsum-style placeholder bio text — real copy comes in Phase 7.
@@ -143,7 +152,7 @@ You (and your mum, if you want early feedback) can now view progress on a real p
 - **Testimonial block** — static component with a placeholder slot/quote until she has real ones.
 - **Mobile nav** — a hamburger toggle; a few lines of vanilla JS (`<script>` tag scoped to the component) toggling a Tailwind class is enough, no library needed.
 
-Astro's "islands" model matters here: everything above is static HTML except the lightbox/slider/nav-toggle, which get a `client:*` directive so only *those* components ship JS to the browser.
+Astro's "islands" model matters here: everything above is static HTML except the lightbox/slider/nav-toggle, which get a `client:*` directive so only _those_ components ship JS to the browser.
 
 ---
 
@@ -152,6 +161,7 @@ Astro's "islands" model matters here: everything above is static HTML except the
 **Goal:** a form that actually delivers messages to an inbox.
 
 Simplest path — **Formspree**: sign up free, get an endpoint URL, point a plain HTML `<form action="https://formspree.io/f/xxxx" method="POST">` at it with `name`, `email`, `message` fields. No JS or backend code required. Add:
+
 - A hidden honeypot field (a text input visually hidden via CSS that bots fill in but humans don't — Formspree/your own check can reject submissions where it's non-empty).
 - Her phone number and email as plain visible text nearby, for people who'd rather not use a form.
 

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Placeholder brand tokens — swap these for real palette/fonts once chosen. */
 @theme {
@@ -7,6 +7,6 @@
   --color-earth: #8a7a63;
   --color-earth-light: #b5a58c;
 
-  --font-display: "Fraunces", serif;
-  --font-body: "Inter", sans-serif;
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Inter', sans-serif;
 }
