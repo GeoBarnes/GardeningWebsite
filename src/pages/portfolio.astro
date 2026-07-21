@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const projects = (await getCollection('projects')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<BaseLayout title="Portfolio">
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <h1 class="font-display text-3xl mb-2">Portfolio</h1>
+    <p class="text-forest/80 mb-10">A selection of recent garden design and planting projects.</p>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {
+        projects.map((project) => (
+          <article class="group">
+            <a href={`/portfolio/${project.id}`}>
+              <img
+                src={project.data.images[0]}
+                alt={project.data.title}
+                width="1200"
+                height="800"
+                loading="lazy"
+                class="w-full aspect-[3/2] object-cover rounded-lg mb-3 transition-opacity group-hover:opacity-90"
+              />
+              <h2 class="font-display text-lg">{project.data.title}</h2>
+              <p class="text-forest/80 text-sm">{project.data.summary}</p>
+            </a>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
