@@ -1,0 +1,52 @@
+---
+// Before/after comparison slider — the single most persuasive element on a
+// gardening portfolio, per the development plan.
+//
+// Built on the `img-comparison-slider` web component (a few KB, no framework).
+// The library manages the drag handle and keyboard arrow-key support, but sets
+// no ARIA of its own, so we supply the role and label here.
+import 'img-comparison-slider/dist/styles.css';
+
+interface Props {
+  before: string;
+  after: string;
+  /** Project title, used to build meaningful alt text for both images. */
+  title: string;
+}
+
+const { before, after, title } = Astro.props;
+---
+
+<figure class="mb-8">
+  <img-comparison-slider
+    class="block w-full overflow-hidden rounded-lg [--divider-color:var(--color-white)] [--divider-width:2px]"
+    role="group"
+    aria-label={`Before and after comparison for ${title}. Drag the handle, or use the arrow keys, to reveal each image.`}
+  >
+    <img
+      slot="first"
+      src={before}
+      alt={`${title} — before the work`}
+      width="800"
+      height="600"
+      class="w-full aspect-[4/3] object-cover"
+    />
+    <img
+      slot="second"
+      src={after}
+      alt={`${title} — after the work`}
+      width="800"
+      height="600"
+      class="w-full aspect-[4/3] object-cover"
+    />
+  </img-comparison-slider>
+  <figcaption class="text-xs text-center mt-2 text-forest/80">
+    Drag to compare &mdash; before (left) and after (right)
+  </figcaption>
+</figure>
+
+<script>
+  // Scoped to this component, so the ~4KB of slider JS only ships on pages that
+  // actually render one. Everything else on the site stays zero-JS.
+  import 'img-comparison-slider';
+</script>

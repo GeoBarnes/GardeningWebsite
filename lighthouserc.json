@@ -2,7 +2,10 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist",
-      "numberOfRuns": 1
+      "numberOfRuns": 1,
+      "_comment": "Two defaults conspire to skip dist/portfolio/<id>/index.html — precisely the pages carrying client-side JS. Discovery depth defaults to 2 (too shallow for /portfolio/<id>/), and autodiscovery caps at 5 URLs. 0 disables the cap.",
+      "staticDirFileDiscoveryDepth": 3,
+      "maxAutodiscoverUrls": 0
     },
     "assert": {
       "assertions": {

@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import BeforeAfterSlider from '../../components/BeforeAfterSlider.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -16,7 +17,7 @@ const { Content } = await render(project);
 
 <BaseLayout title={project.data.title} description={project.data.summary}>
   <article class="max-w-3xl mx-auto px-6 py-16">
-    <a href="/portfolio" class="text-sm underline hover:text-forest-light"
+    <a href="/portfolio/" class="text-sm underline hover:text-forest-light"
       >&larr; Back to portfolio</a
     >
     <h1 class="font-display text-3xl mt-4 mb-2">{project.data.title}</h1>
@@ -24,28 +25,11 @@ const { Content } = await render(project);
 
     {
       project.data.beforeAfter && (
-        <div class="grid grid-cols-2 gap-2 mb-8">
-          <div>
-            <img
-              src={project.data.beforeAfter.before}
-              alt={`${project.data.title} — before`}
-              width="800"
-              height="600"
-              class="w-full aspect-[4/3] object-cover rounded-lg"
-            />
-            <p class="text-xs text-center mt-1 text-forest/80">Before</p>
-          </div>
-          <div>
-            <img
-              src={project.data.beforeAfter.after}
-              alt={`${project.data.title} — after`}
-              width="800"
-              height="600"
-              class="w-full aspect-[4/3] object-cover rounded-lg"
-            />
-            <p class="text-xs text-center mt-1 text-forest/80">After</p>
-          </div>
-        </div>
+        <BeforeAfterSlider
+          before={project.data.beforeAfter.before}
+          after={project.data.beforeAfter.after}
+          title={project.data.title}
+        />
       )
     }
 

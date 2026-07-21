@@ -22,7 +22,7 @@ describe('BaseLayout', () => {
   });
 
   it('links to all four primary routes in the nav', () => {
-    for (const href of ['/', '/portfolio', '/about', '/contact']) {
+    for (const href of ['/', '/portfolio/', '/about/', '/contact/']) {
       expect(html).toContain(`href="${href}"`);
     }
   });
