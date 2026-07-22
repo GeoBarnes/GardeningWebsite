@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Where Formspree sends people after a successful submission, via the `_next`
+// field on the contact form. `noindex` because it only makes sense as the end
+// of a journey — landing here from a search result would be baffling.
+---
+
+<BaseLayout title="Message sent" noindex>
+  <section class="max-w-2xl mx-auto px-6 py-16">
+    <h1 class="font-display text-3xl mb-2">Thanks — your message is on its way</h1>
+    <p class="text-forest/80 mb-8">
+      I read every enquiry personally and aim to reply within a couple of working days. If it's
+      urgent, do give me a ring.
+    </p>
+
+    <div class="text-forest/80 text-sm">
+      <p>Phone: <a href="tel:+447000000000" class="underline">07000 000000</a></p>
+      <p>Email: <a href="mailto:hello@example.com" class="underline">hello@example.com</a></p>
+    </div>
+
+    <a
+      href="/"
+      class="inline-block mt-10 bg-forest text-white px-6 py-3 rounded-full font-medium hover:bg-forest-light transition-colors"
+    >
+      Back to the home page
+    </a>
+  </section>
+</BaseLayout>

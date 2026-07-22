@@ -23,4 +23,6 @@ export const routes: RouteFixture[] = [
   { path: '/portfolio/willow-cottage-patio/', title: 'Willow Cottage Patio' },
   { path: '/about/', title: 'About' },
   { path: '/contact/', title: 'Contact' },
+  // Not linked from the nav — reached only via Formspree's post-submit redirect.
+  { path: '/contact/thanks/', title: 'Message sent' },
 ];

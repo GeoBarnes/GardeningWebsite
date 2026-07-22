@@ -4,9 +4,16 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  /** Keeps a page out of search results. For pages that only make sense as the
+   * end of a journey — the form confirmation — not as an entry point. */
+  noindex?: boolean;
 }
 
-const { title, description = 'Friendly, experienced garden design and maintenance.' } = Astro.props;
+const {
+  title,
+  description = 'Friendly, experienced garden design and maintenance.',
+  noindex = false,
+} = Astro.props;
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -24,6 +31,7 @@ const navLinks = [
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} | Placeholder Gardening Co.</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
