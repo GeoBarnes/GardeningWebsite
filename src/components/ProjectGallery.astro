@@ -43,16 +43,35 @@ const { images, title } = Astro.props;
   import PhotoSwipeLightbox from 'photoswipe/lightbox';
   import 'photoswipe/style.css';
 
-  const lightbox = new PhotoSwipeLightbox({
-    gallery: '#project-gallery',
-    children: 'a',
-    // The core module is a dynamic import, so its weight lands only when a
-    // visitor actually opens an image rather than on page load.
-    pswpModule: () => import('photoswipe'),
-  });
+  // View transitions swap the document without reloading it, so a lightbox
+  // bound on first load would be left pointing at a gallery that is no longer
+  // in the page. Rebuild it per page, and tear the old one down.
+  let lightbox: PhotoSwipeLightbox | null = null;
 
-  // No alt-text wiring needed: PhotoSwipe copies each thumbnail's `alt` onto
-  // the full-size image itself, so the overlay is labelled for screen readers
-  // as long as the thumbnails are.
-  lightbox.init();
+  const init = () => {
+    // Guarded because this runs both directly and from `astro:page-load`, and
+    // which of the two fires first depends on whether this module had already
+    // been loaded by an earlier page.
+    if (lightbox || !document.getElementById('project-gallery')) return;
+
+    lightbox = new PhotoSwipeLightbox({
+      gallery: '#project-gallery',
+      children: 'a',
+      // The core module is a dynamic import, so its weight lands only when a
+      // visitor actually opens an image rather than on page load.
+      pswpModule: () => import('photoswipe'),
+    });
+
+    // No alt-text wiring needed: PhotoSwipe copies each thumbnail's `alt` onto
+    // the full-size image itself, so the overlay is labelled for screen readers
+    // as long as the thumbnails are.
+    lightbox.init();
+  };
+
+  init();
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => {
+    lightbox?.destroy();
+    lightbox = null;
+  });
 </script>

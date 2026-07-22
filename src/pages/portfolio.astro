@@ -15,7 +15,7 @@ const projects = (await getCollection('projects')).sort(
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {
         projects.map((project) => (
-          <article class="group">
+          <article class="group" data-reveal>
             <a href={`/portfolio/${project.id}/`}>
               <img
                 src={project.data.images[0].src}

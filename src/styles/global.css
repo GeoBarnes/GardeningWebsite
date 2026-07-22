@@ -10,3 +10,53 @@
   --font-display: 'Fraunces', serif;
   --font-body: 'Inter', sans-serif;
 }
+
+/* ---------------------------------------------------------------------------
+   Scroll reveal
+
+   The hidden starting state is deliberately gated behind `.js`, which an inline
+   script in <head> adds before the page paints. Without it — JS disabled, or the
+   script failed — `[data-reveal]` elements are simply visible, so a broken
+   enhancement can never leave the page blank. Gating in the <head> rather than
+   from the reveal script itself is what avoids a flash of visible content.
+
+   The animation is a plain CSS transition. A JS animation library would add a
+   dependency to every page to express exactly this.
+   --------------------------------------------------------------------------- */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+[data-reveal] {
+  transition:
+    opacity 600ms ease-out,
+    transform 600ms ease-out;
+}
+
+[data-reveal][data-revealed] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Show everything outright rather than animating it more gently. */
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+
+  [data-reveal] {
+    transition: none;
+  }
+
+  /* Astro's view transitions animate via the ::view-transition pseudo-elements,
+     which sit outside the document and so ignore any rule above. Disable them
+     explicitly — cross-page movement is exactly what motion sensitivity is
+     about, and this is the whole-page one. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

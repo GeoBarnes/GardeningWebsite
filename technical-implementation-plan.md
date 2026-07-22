@@ -256,7 +256,17 @@ The testimonials collection exists but is deliberately empty, and `Testimonials.
 
 `astro.config.mjs` gained `site`, since `_next` must be an absolute URL. Phase 9's sitemap and canonical tags will read the same value, and it needs updating when the real domain lands in Phase 10.
 
-Still to build: Motion One scroll-reveal, View Transitions, JSON-LD/SEO tags, sitemap, real photos and copy.
+**Phase 8 is done**, with one deliberate departure from the plan: the scroll-reveal is a CSS transition driven by an `IntersectionObserver`, not Motion One. The plan chose Motion One over GSAP on footprint grounds, and the same reasoning taken one step further lands on no library at all — the effect is a fade and a 1rem rise, which is two CSS declarations. Motion One would have added a dependency to every page to express that. If the motion design later grows springs, staggering or sequenced timelines, that is the point to reach for it.
+
+The reveal cannot hide content permanently: the hidden starting state is gated behind a `.js` class added by an inline `<head>` script, so with JS disabled or broken the elements are simply visible. `prefers-reduced-motion` is honoured in both the CSS and the observer, and the `::view-transition-*` pseudo-elements are silenced under it too — they sit outside the document, so ordinary rules do not reach them. Reveals are applied to 3–4 elements per page and never to the hero, which is the LCP element.
+
+View transitions (`<ClientRouter />`) are the larger change, because they alter how every script on the site must be written — see CLAUDE.md. The mobile nav was rewritten to delegate its listeners to `document`, and the PhotoSwipe lightbox now rebuilds per page and tears down on `astro:before-swap`. Both are covered by tests that navigate client-side first, since a page-two regression is invisible to a test that only loads pages directly.
+
+**The cost, stated plainly:** every page now downloads the ~15.7KB (~6KB gzipped) ClientRouter bundle, where before the only always-present JS was a few hundred inlined bytes. Lighthouse performance is unaffected (1.0 on most routes, 0.94 on the portfolio index), but the "zero JS by default" claim is now "one small bundle by default". Worth revisiting if the wow factor turns out not to earn it.
+
+Still to build: JSON-LD/SEO tags, sitemap, real photos and copy.
+
+**Note on Lighthouse SEO warnings:** every route now scores ~0.63 on SEO because Lighthouse flags "page is blocked from indexing". That is the deliberate pre-launch `noindex`, not a regression, and it will clear when `SITE_INDEXABLE` is flipped at launch. The Lighthouse job is advisory and never blocks a merge.
 
 **Known perf note:** the project detail pages score 0.87 against a 0.9 performance budget (warn-level, non-blocking). The cause is not the slider — total blocking time is 0ms. It is the render-blocking Google Fonts stylesheet (~874ms) and `placehold.co` images serving as the LCP element. Both resolve naturally in Phase 7 when real, locally-optimised images land and the fonts can be self-hosted.
 

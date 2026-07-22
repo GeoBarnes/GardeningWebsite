@@ -24,15 +24,15 @@ import Testimonials from '../components/Testimonials.astro';
   </section>
 
   <section class="max-w-5xl mx-auto px-6 py-16 grid sm:grid-cols-3 gap-8 text-center">
-    <div>
+    <div data-reveal>
       <h2 class="font-display text-xl mb-2">Placeholder service one</h2>
       <p class="text-forest/80 text-sm">Short description of what's on offer.</p>
     </div>
-    <div>
+    <div data-reveal>
       <h2 class="font-display text-xl mb-2">Placeholder service two</h2>
       <p class="text-forest/80 text-sm">Short description of what's on offer.</p>
     </div>
-    <div>
+    <div data-reveal>
       <h2 class="font-display text-xl mb-2">Placeholder service three</h2>
       <p class="text-forest/80 text-sm">Short description of what's on offer.</p>
     </div>
@@ -41,7 +41,9 @@ import Testimonials from '../components/Testimonials.astro';
   <!-- Renders nothing until the testimonials collection has entries. -->
   <Testimonials />
 
-  <section class="bg-earth-light/20 py-16 text-center px-6">
+  <!-- The hero is deliberately not revealed: it is above the fold and the LCP
+       element, so fading it in would delay the largest paint to win nothing. -->
+  <section class="bg-earth-light/20 py-16 text-center px-6" data-reveal>
     <h2 class="font-display text-2xl mb-4">See the work</h2>
     <p class="text-forest/80 mb-6">A preview of recent projects — full portfolio linked below.</p>
     <a href="/portfolio/" class="underline hover:text-forest-light">View the portfolio &rarr;</a>
