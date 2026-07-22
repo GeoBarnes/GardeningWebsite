@@ -1,0 +1,42 @@
+---
+// Client testimonials.
+//
+// Renders *nothing* — no heading, no empty container, no whitespace — while the
+// collection has no entries. An empty "What clients say" section reads as a
+// gap in the business rather than a gap in the content, which is worse than
+// having no section at all. Dropping the first Markdown file into
+// src/content/testimonials/ makes it appear with no code change here.
+import { getCollection } from 'astro:content';
+
+const testimonials = await getCollection('testimonials');
+const sorted = testimonials.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+{
+  sorted.length > 0 && (
+    <section class="bg-earth-light/15 py-16" aria-labelledby="testimonials-heading">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 id="testimonials-heading" class="font-display text-2xl mb-8 text-center">
+          What clients say
+        </h2>
+        <ul class="grid gap-6 sm:grid-cols-2">
+          {sorted.map((testimonial) => (
+            <li>
+              <figure class="h-full bg-white rounded-lg p-6 flex flex-col gap-4">
+                <blockquote class="text-forest/80 leading-relaxed">
+                  <p>{testimonial.data.quote}</p>
+                </blockquote>
+                <figcaption class="text-sm font-medium mt-auto">
+                  {testimonial.data.author}
+                  {testimonial.data.location && (
+                    <span class="font-normal text-forest/80">, {testimonial.data.location}</span>
+                  )}
+                </figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}

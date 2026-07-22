@@ -1,0 +1,58 @@
+---
+// Thumbnail grid that opens into a PhotoSwipe lightbox.
+//
+// The markup is a plain list of links to the full-size images, so it still
+// works with JS disabled — clicking a thumbnail just opens the image directly.
+// PhotoSwipe enhances that into an overlay gallery.
+import type { ProjectImage } from '../content/schema';
+
+interface Props {
+  images: ProjectImage[];
+  /** Fallback alt text when an image has none of its own. */
+  title: string;
+}
+
+const { images, title } = Astro.props;
+---
+
+<div class="grid sm:grid-cols-2 gap-4 mb-8" id="project-gallery">
+  {
+    images.map((image) => (
+      <a
+        href={image.src}
+        data-pswp-width={image.width}
+        data-pswp-height={image.height}
+        target="_blank"
+        rel="noreferrer"
+        class="block rounded-lg overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
+      >
+        <img
+          src={image.src}
+          alt={image.alt ?? title}
+          width={image.width}
+          height={image.height}
+          loading="lazy"
+          class="w-full aspect-[3/2] object-cover"
+        />
+      </a>
+    ))
+  }
+</div>
+
+<script>
+  import PhotoSwipeLightbox from 'photoswipe/lightbox';
+  import 'photoswipe/style.css';
+
+  const lightbox = new PhotoSwipeLightbox({
+    gallery: '#project-gallery',
+    children: 'a',
+    // The core module is a dynamic import, so its weight lands only when a
+    // visitor actually opens an image rather than on page load.
+    pswpModule: () => import('photoswipe'),
+  });
+
+  // No alt-text wiring needed: PhotoSwipe copies each thumbnail's `alt` onto
+  // the full-size image itself, so the overlay is labelled for screen readers
+  // as long as the thumbnails are.
+  lightbox.init();
+</script>

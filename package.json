@@ -25,6 +25,7 @@
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.1.2",
     "img-comparison-slider": "^8.0.7",
+    "photoswipe": "^5.4.4",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {

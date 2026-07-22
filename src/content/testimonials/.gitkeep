@@ -1,0 +1,16 @@
+# Testimonials live here as one Markdown file each, e.g. `jane-smith.md`:
+#
+#     ---
+#     quote: 'She transformed a patch of nettles into somewhere we actually sit.'
+#     author: 'Jane Smith'
+#     location: 'Bramley'      # optional
+#     date: 2026-05-01
+#     ---
+#
+# The Testimonials section renders nothing at all while this directory has no
+# entries — an empty "What clients say" heading reads as a gap, so the whole
+# block is omitted rather than shown empty. Adding the first file makes it
+# appear with no code change.
+#
+# This file only exists to keep the directory in git. Delete it once there are
+# real testimonials, or leave it — the glob only picks up *.md.

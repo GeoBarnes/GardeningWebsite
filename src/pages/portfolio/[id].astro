@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BeforeAfterSlider from '../../components/BeforeAfterSlider.astro';
+import ProjectGallery from '../../components/ProjectGallery.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -33,20 +34,7 @@ const { Content } = await render(project);
       )
     }
 
-    <div class="grid sm:grid-cols-2 gap-4 mb-8">
-      {
-        project.data.images.map((src) => (
-          <img
-            src={src}
-            alt={project.data.title}
-            width="1200"
-            height="800"
-            loading="lazy"
-            class="w-full aspect-[3/2] object-cover rounded-lg"
-          />
-        ))
-      }
-    </div>
+    <ProjectGallery images={project.data.images} title={project.data.title} />
 
     <div class="text-forest/80 leading-relaxed [&>p]:mb-4">
       <Content />
