@@ -201,7 +201,9 @@ Later upgrade path (not needed for prototype): swap to a Cloudflare Pages Functi
 
 ## Phase 10 — Domain & launch checklist
 
+- **Set `SITE_INDEXABLE = true` in `src/config.ts`, and delete `tests/e2e/noindex.spec.ts`.** The site is held out of search results while it is a placeholder — every page carries `noindex, nofollow` and `robots.txt` disallows everything. That spec asserts the pre-launch state unconditionally, so it fails the moment the switch is thrown; deleting it is part of launching, not a workaround.
 - Register a domain (Cloudflare Registrar or Namecheap) and point it at the Cloudflare Pages project — HTTPS is automatic.
+- Update `site` in `astro.config.mjs` to the real domain — the contact form's `_next` redirect and Phase 9's canonical/sitemap URLs are all built from it.
 - Add a custom `src/pages/404.astro`.
 - Run Lighthouse in Chrome DevTools against the live URL; fix anything glaring (usually image sizing or contrast).
 - Test on a couple of real phones.

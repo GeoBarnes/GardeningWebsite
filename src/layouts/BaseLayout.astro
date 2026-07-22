@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { SITE_INDEXABLE } from '../config';
 
 interface Props {
   title: string;
@@ -31,7 +32,14 @@ const navLinks = [
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} | Placeholder Gardening Co.</title>
     <meta name="description" content={description} />
-    {noindex && <meta name="robots" content="noindex" />}
+    {
+      /* While the site is a prototype every page is held back, not just the
+         ones marked noindex individually. `nofollow` too, so a crawler that
+         reaches one page does not spider outward from it. */
+      (!SITE_INDEXABLE || noindex) && (
+        <meta name="robots" content={SITE_INDEXABLE ? 'noindex' : 'noindex, nofollow'} />
+      )
+    }
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
