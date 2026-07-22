@@ -18,10 +18,10 @@ const projects = (await getCollection('projects')).sort(
           <article class="group">
             <a href={`/portfolio/${project.id}/`}>
               <img
-                src={project.data.images[0]}
-                alt={project.data.title}
-                width="1200"
-                height="800"
+                src={project.data.images[0].src}
+                alt={project.data.images[0].alt ?? project.data.title}
+                width={project.data.images[0].width}
+                height={project.data.images[0].height}
                 loading="lazy"
                 class="w-full aspect-[3/2] object-cover rounded-lg mb-3 transition-opacity group-hover:opacity-90"
               />

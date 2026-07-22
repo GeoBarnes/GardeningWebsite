@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Testimonials from '../components/Testimonials.astro';
 ---
 
 <BaseLayout title="Home">
@@ -36,6 +37,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <p class="text-forest/80 text-sm">Short description of what's on offer.</p>
     </div>
   </section>
+
+  <!-- Renders nothing until the testimonials collection has entries. -->
+  <Testimonials />
 
   <section class="bg-earth-light/20 py-16 text-center px-6">
     <h2 class="font-display text-2xl mb-4">See the work</h2>
