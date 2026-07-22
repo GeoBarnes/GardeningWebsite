@@ -246,7 +246,15 @@ The **mobile nav** is also built: below the `sm` breakpoint the inline link list
 
 Testing grew a viewport axis to cover it: `playwright.config.ts` now runs every spec under both a `chromium` and a `mobile` (Pixel 7) project, and width-dependent specs guard themselves with the `isMobile` fixture. The open menu gets its own axe sweep, since the route-driven a11y spec only ever sees pages in their initial state.
 
-Still to build: lightbox, testimonial block (rest of Phase 5), Motion One scroll-reveal, View Transitions, real Formspree endpoint (Phase 6 — needs an endpoint URL), JSON-LD/SEO tags, sitemap, real photos and copy.
+**Phase 5 is done.** The PhotoSwipe lightbox is wired to the project galleries; its ~59KB core is a dynamic import, so it is fetched only when someone actually opens an image. This forced a schema change — `images` entries are now objects carrying `src`/`width`/`height`/optional `alt`, because PhotoSwipe needs intrinsic dimensions before the full image loads. The array requires at least one entry, since the portfolio grid uses `images[0]` as each card's thumbnail.
+
+The testimonials collection exists but is deliberately empty, and `Testimonials.astro` renders nothing at all while it stays that way — no heading, no empty container. Dropping in the first Markdown file is the only step needed to make the section appear.
+
+**Phase 6 is done.** The contact form posts to a real Formspree endpoint using the Basic HTML integration — a plain `action`/`method` POST, no JavaScript. The AJAX SDK would have added a bundle to buy inline validation the browser already does natively, and would break the form entirely if the script failed to load. Alongside it: `_gotcha` as the honeypot name (Formspree's own convention, so their server-side filtering applies rather than the field sitting inert), `_subject` for a recognisable subject line, and `_next` pointing at a new `/contact/thanks/` page so people land back on her site rather than Formspree's branded confirmation. That page is `noindex` — it only makes sense as the end of a journey.
+
+`astro.config.mjs` gained `site`, since `_next` must be an absolute URL. Phase 9's sitemap and canonical tags will read the same value, and it needs updating when the real domain lands in Phase 10.
+
+Still to build: Motion One scroll-reveal, View Transitions, JSON-LD/SEO tags, sitemap, real photos and copy.
 
 **Known perf note:** the project detail pages score 0.87 against a 0.9 performance budget (warn-level, non-blocking). The cause is not the slider — total blocking time is 0ms. It is the render-blocking Google Fonts stylesheet (~874ms) and `placehold.co` images serving as the LCP element. Both resolve naturally in Phase 7 when real, locally-optimised images land and the fonts can be self-hosted.
 

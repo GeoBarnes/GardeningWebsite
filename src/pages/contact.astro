@@ -1,5 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Formspree endpoint. Safe to commit: it is a public identifier that ships in
+// the page HTML by definition, so an env var would hide nothing.
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xojgnvrd';
+
+// `_next` must be absolute, so derive it from the configured `site` rather than
+// hardcoding the host in two places.
+const thanksUrl = new URL('/contact/thanks/', Astro.site).href;
 ---
 
 <BaseLayout title="Contact">
@@ -10,11 +18,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </p>
 
     <!--
-      Prototype form: not yet wired to a real endpoint.
-      Phase 6 replaces the action below with a Formspree endpoint
-      (https://formspree.io/f/your-form-id) once an account exists.
+      Plain HTML POST, no JavaScript. Formspree's AJAX SDK would add a bundle to
+      buy inline validation the browser already does natively, and would make
+      the form stop working entirely if the script failed to load.
     -->
-    <form class="space-y-4" method="POST" action="#">
+    <form class="space-y-4" method="POST" action={FORMSPREE_ENDPOINT}>
+      <!-- Without this, every enquiry arrives titled "New submission". -->
+      <input type="hidden" name="_subject" value="New enquiry from the website" />
+      <!-- Return to our own thank-you page instead of Formspree's branded one. -->
+      <input type="hidden" name="_next" value={thanksUrl} />
       <div>
         <label for="name" class="block text-sm font-medium mb-1">Name</label>
         <input
@@ -46,10 +58,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         ></textarea>
       </div>
 
-      <!-- Honeypot: hidden from real users via CSS, bots often fill it in -->
+      <!--
+        Honeypot: off-screen for real users, bots fill it in. The name `_gotcha`
+        is Formspree's own convention — they discard any submission where it is
+        non-empty, so the filtering happens server-side rather than this field
+        just sitting here inert. `tabindex="-1"` keeps it out of the tab order,
+        which is also what makes the `aria-hidden` wrapper legitimate.
+      -->
       <div class="absolute -left-[9999px]" aria-hidden="true">
         <label for="company">Company</label>
-        <input type="text" id="company" name="company" tabindex="-1" autocomplete="off" />
+        <input type="text" id="company" name="_gotcha" tabindex="-1" autocomplete="off" />
       </div>
 
       <button
