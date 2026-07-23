@@ -252,7 +252,9 @@ Testing grew a viewport axis to cover it: `playwright.config.ts` now runs every 
 
 The testimonials collection exists but is deliberately empty, and `Testimonials.astro` renders nothing at all while it stays that way — no heading, no empty container. Dropping in the first Markdown file is the only step needed to make the section appear.
 
-**Phase 6 is done.** The contact form posts to a real Formspree endpoint using the Basic HTML integration — a plain `action`/`method` POST, no JavaScript. The AJAX SDK would have added a bundle to buy inline validation the browser already does natively, and would break the form entirely if the script failed to load. Alongside it: `_gotcha` as the honeypot name (Formspree's own convention, so their server-side filtering applies rather than the field sitting inert), `_subject` for a recognisable subject line, and `_next` pointing at a new `/contact/thanks/` page so people land back on her site rather than Formspree's branded confirmation. That page is `noindex` — it only makes sense as the end of a journey.
+**Phase 6 is done.** The contact form posts to a real Formspree endpoint. The markup is a plain `action`/`method` POST that works with no JavaScript, and a small hand-rolled script (not Formspree's SDK) progressively enhances it: it intercepts the submit, posts via `fetch`, and sends the visitor to our own `/contact/thanks/` page. That enhancement exists because Formspree ignores the `_next` redirect on its free plan — a plain POST lands everyone on Formspree's branded page — so doing the redirect client-side is what actually keeps people on her site. It is never load-bearing: if the fetch fails (or JS is off) it falls back to the plain POST, so the form can't be broken by the script. Alongside it: `_gotcha` as the honeypot name (Formspree's own convention, so their server-side filtering applies rather than the field sitting inert), `_subject` for a recognisable subject line, and `_next` pointing at `/contact/thanks/` (an absolute URL, for the no-JS fallback path). That page is `noindex` — it only makes sense as the end of a journey.
+
+_Note:_ once the form is on a paid Formspree plan (or if `_next` starts being honoured on free), the enhancement becomes belt-and-braces rather than essential — but it does no harm either way, and the client-side redirect keeps working across a future custom domain because it derives a same-origin path from `_next` rather than trusting the absolute URL.
 
 `astro.config.mjs` gained `site`, since `_next` must be an absolute URL. Phase 9's sitemap and canonical tags will read the same value, and it needs updating when the real domain lands in Phase 10.
 
@@ -264,7 +266,11 @@ View transitions (`<ClientRouter />`) are the larger change, because they alter 
 
 **The cost, stated plainly:** every page now downloads the ~15.7KB (~6KB gzipped) ClientRouter bundle, where before the only always-present JS was a few hundred inlined bytes. Lighthouse performance is unaffected (1.0 on most routes, 0.94 on the portfolio index), but the "zero JS by default" claim is now "one small bundle by default". Worth revisiting if the wow factor turns out not to earn it.
 
-Still to build: JSON-LD/SEO tags, sitemap, real photos and copy.
+**Phase 9 is done.** Every page now carries canonical, Open Graph and Twitter Card meta (built from `site`, so they're the production origin even when previewed on localhost), fed a per-page `head` slot on `BaseLayout`. About and Contact — the two pages actually about the business — emit a `LocalBusiness` JSON-LD block. `@astrojs/sitemap` generates `sitemap-index.xml` (excluding the noindex `/contact/thanks/`), and `robots.txt` gains a `Sitemap:` line once indexable.
+
+The one structural change worth noting: the business's name, description, phone, email and service area now live in a single `BUSINESS` object in `src/config.ts`, which feeds the visible footer/contact details _and_ the JSON-LD — so they can't disagree, which is exactly the name/phone/email consistency search engines reward. The share image defaults to a `placehold.co` box (`DEFAULT_OG_IMAGE`) like the rest of the prototype, valid now and an obvious swap for a real photo in Phase 7. All of this is `noindex` until launch, so it's dormant but correct; `tests/e2e/seo.spec.ts` covers it.
+
+Still to build: real photos and copy (Phase 7), then the launch checklist (Phase 10) — including a real OG image and flipping `SITE_INDEXABLE`.
 
 **Note on Lighthouse SEO warnings:** every route now scores ~0.63 on SEO because Lighthouse flags "page is blocked from indexing". That is the deliberate pre-launch `noindex`, not a regression, and it will clear when `SITE_INDEXABLE` is flipped at launch. The Lighthouse job is advisory and never blocks a merge.
 

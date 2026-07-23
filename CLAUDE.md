@@ -56,6 +56,10 @@ Node 22.12+ is required and pinned in `.node-version`; fnm auto-switches in this
 
 **Design tokens.** Colors and fonts are Tailwind 4 `@theme` tokens in [src/styles/global.css](src/styles/global.css) (`forest`, `earth`, `font-display`, `font-body`) — there is no `tailwind.config.js`. Changing the palette is a single-file edit; never hardcode hex values in components.
 
+**Business details have one home.** Name, description, phone, email and service area live in the `BUSINESS` object in [src/config.ts](src/config.ts), and feed both the visible footer/contact page and the `LocalBusiness` JSON-LD in [LocalBusinessSchema.astro](src/components/LocalBusinessSchema.astro). Never hardcode a phone number or email in a component — search engines penalise NAP (name/address/phone) that disagrees between the visible text and the structured data, and a single source is what prevents that. These are placeholders until Phase 7.
+
+**SEO metadata is centralised in the layout.** [BaseLayout.astro](src/layouts/BaseLayout.astro) emits canonical + Open Graph + Twitter tags for every page from its `title`/`description`/`image` props, all built from `site` so they carry the production origin even on localhost — when `site` is unset (the Container API in unit tests) it falls back to the request origin rather than throwing. Per-page `<head>` extras (like a page's JSON-LD) go through the named `head` slot. The `LocalBusiness` block is only on About and Contact — the pages about the business itself, not every route. `@astrojs/sitemap` generates the sitemap (the `filter` drops the noindex `/contact/thanks/`); [seo.spec.ts](tests/e2e/seo.spec.ts) is route-fixture-driven like the smoke/a11y sweeps, so a new page is covered by the same one-line fixture edit.
+
 ## When to run the tests while making changes
 
 Match the layer to what you touched — don't reach for the browser suite on a one-line copy edit, and don't skip it after changing routing.

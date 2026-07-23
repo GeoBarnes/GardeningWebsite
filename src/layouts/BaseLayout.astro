@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
-import { SITE_INDEXABLE } from '../config';
+import { SITE_INDEXABLE, BUSINESS, DEFAULT_OG_IMAGE } from '../config';
 
 interface Props {
   title: string;
@@ -9,13 +9,26 @@ interface Props {
   /** Keeps a page out of search results. For pages that only make sense as the
    * end of a journey — the form confirmation — not as an entry point. */
   noindex?: boolean;
+  /** Social-share image: an absolute URL, or a site-relative path resolved
+   * against `site`. Defaults to the shared placeholder. */
+  image?: string;
 }
 
 const {
   title,
-  description = 'Friendly, experienced garden design and maintenance.',
+  description = BUSINESS.description,
   noindex = false,
+  image = DEFAULT_OG_IMAGE,
 } = Astro.props;
+
+const pageTitle = `${title} | ${BUSINESS.name}`;
+// The page's own canonical URL, and absolute share image, both built from
+// `site` so they're the production origin even when previewed on localhost.
+// Fall back to the request origin when `site` is unset (e.g. the Container API
+// in unit tests), so rendering never throws on a missing base.
+const base = Astro.site ?? Astro.url;
+const canonicalURL = new URL(Astro.url.pathname, base);
+const ogImage = image.startsWith('http') ? image : new URL(image, base).href;
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -31,8 +44,9 @@ const navLinks = [
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title} | Placeholder Gardening Co.</title>
+    <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL.href} />
     {
       /* While the site is a prototype every page is held back, not just the
          ones marked noindex individually. `nofollow` too, so a crawler that
@@ -41,6 +55,19 @@ const navLinks = [
         <meta name="robots" content={SITE_INDEXABLE ? 'noindex' : 'noindex, nofollow'} />
       )
     }
+
+    {/* Open Graph + Twitter, for link previews in messaging apps and socials. */}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={BUSINESS.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
     <ClientRouter />
     <!--
       Marks JS as available before the first paint, which is what lets the
@@ -57,12 +84,14 @@ const navLinks = [
       href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    {/* Per-page <head> extras — e.g. a page's structured-data block. */}
+    <slot name="head" />
   </head>
   <body class="min-h-screen flex flex-col bg-white font-body text-forest">
     <header class="border-b border-earth-light/40">
       <nav class="max-w-5xl mx-auto px-6 py-4" aria-label="Main">
         <div class="flex items-center justify-between">
-          <a href="/" class="font-display text-xl text-forest">Placeholder Gardening Co.</a>
+          <a href="/" class="font-display text-xl text-forest">{BUSINESS.name}</a>
 
           <!-- Desktop links: the whole list inline, from `sm` up. -->
           <ul class="hidden sm:flex gap-6 text-sm">
@@ -133,8 +162,12 @@ const navLinks = [
       <div
         class="max-w-5xl mx-auto px-6 py-8 text-sm text-forest/80 flex flex-col sm:flex-row justify-between gap-2"
       >
-        <p>&copy; {new Date().getFullYear()} Placeholder Gardening Co.</p>
-        <p>Serving [service area] &middot; hello@example.com &middot; 07000 000000</p>
+        <p>&copy; {new Date().getFullYear()} {BUSINESS.name}</p>
+        <p>
+          Serving {BUSINESS.areaServed} &middot; {BUSINESS.email} &middot; {
+            BUSINESS.telephoneDisplay
+          }
+        </p>
       </div>
     </footer>
 

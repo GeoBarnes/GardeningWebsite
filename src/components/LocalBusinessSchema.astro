@@ -1,0 +1,26 @@
+---
+// LocalBusiness structured data (JSON-LD) for local SEO — it's how a search
+// engine reads her name, service area and contact details as a business rather
+// than as loose page text. Rendered on About and Contact, the two pages that
+// are actually about the business itself.
+//
+// Every value comes from the single BUSINESS source in config, so it can't
+// disagree with the visible footer/contact details — which is exactly the
+// name/address/phone consistency search engines look for. `url` is the site's
+// own origin.
+import { BUSINESS } from '../config';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: BUSINESS.name,
+  description: BUSINESS.description,
+  email: BUSINESS.email,
+  telephone: BUSINESS.telephone,
+  areaServed: BUSINESS.areaServed,
+  url: new URL('/', Astro.site).href,
+};
+---
+
+{/* set:html so the JSON is emitted raw rather than HTML-escaped. */}
+<script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
