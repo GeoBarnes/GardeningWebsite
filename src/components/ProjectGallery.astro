@@ -22,8 +22,6 @@ const { images, title } = Astro.props;
         href={image.src}
         data-pswp-width={image.width}
         data-pswp-height={image.height}
-        target="_blank"
-        rel="noreferrer"
         class="block rounded-lg overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
       >
         <img
@@ -62,10 +60,37 @@ const { images, title } = Astro.props;
       pswpModule: () => import('photoswipe'),
     });
 
+    // PhotoSwipe doesn't lock the document behind the overlay — it only stops
+    // scroll on the layer it owns. Without this the page keeps scrolling behind
+    // the fixed lightbox (very visible in Safari and on phones, where it reads
+    // as the overlay "sticking" mid-page). Lock <html> while it's open and
+    // compensate for the vanished scrollbar so nothing jumps on close.
+    lightbox.on('beforeOpen', () => {
+      const gutter = window.innerWidth - document.documentElement.clientWidth;
+      document.documentElement.style.setProperty('--pswp-gutter', `${gutter}px`);
+      document.documentElement.classList.add('pswp-open');
+    });
+    lightbox.on('close', () => {
+      document.documentElement.classList.remove('pswp-open');
+    });
+
     // No alt-text wiring needed: PhotoSwipe copies each thumbnail's `alt` onto
     // the full-size image itself, so the overlay is labelled for screen readers
     // as long as the thumbnails are.
     lightbox.init();
+
+    // Once the lightbox is open PhotoSwipe deliberately ignores further clicks
+    // on the thumbnails and lets the browser follow the link (see its
+    // `onThumbnailsClick`: it returns early while `window.pswp` is set). So the
+    // second click of a double-click navigated to the raw image. Swallow any
+    // thumbnail click while the lightbox is open — PhotoSwipe owns the UI then.
+    // The link stays live with JS disabled, which is the whole point of it.
+    document.getElementById('project-gallery')?.addEventListener('click', (event) => {
+      const openLightbox = (window as unknown as { pswp?: unknown }).pswp;
+      if (openLightbox && (event.target as HTMLElement).closest('a')) {
+        event.preventDefault();
+      }
+    });
   };
 
   init();

@@ -102,6 +102,45 @@ test.describe('project gallery lightbox', () => {
     );
   });
 
+  test('locks the document behind the overlay, and unlocks it on close', async ({ page }) => {
+    // PhotoSwipe doesn't stop the page scrolling behind its fixed overlay, so
+    // the background used to scroll away underneath the lightbox — it read as
+    // the overlay sticking mid-page, worst on Safari and phones. The lock is a
+    // class on <html>; it must go on when the lightbox opens and off when it
+    // closes, or the whole page is left unscrollable.
+    await expect(page.locator('html')).not.toHaveClass(/pswp-open/);
+
+    await page.locator('#project-gallery a').first().click();
+    await waitForLightboxOpen(page);
+    await expect(page.locator('html')).toHaveClass(/pswp-open/);
+    await expect(page.locator('html')).toHaveCSS('overflow-y', 'hidden');
+
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.pswp')).toHaveCount(0);
+    await expect(page.locator('html')).not.toHaveClass(/pswp-open/);
+  });
+
+  test('a double-click opens the lightbox without navigating or opening a tab', async ({
+    page,
+    context,
+  }) => {
+    // PhotoSwipe ignores clicks while already open and lets the link's default
+    // navigation fire, so the second click of a double-click followed the href
+    // to the bare image. Both the removed target="_blank" and the guard that
+    // swallows the stray click keep a double-click on-page.
+    let openedTab = false;
+    context.on('page', () => {
+      openedTab = true;
+    });
+    const startUrl = page.url();
+
+    await page.locator('#project-gallery a').first().dblclick();
+    await waitForLightboxOpen(page);
+
+    expect(openedTab).toBe(false);
+    expect(page.url()).toBe(startUrl);
+  });
+
   test('has no accessibility violations while open', async ({ page }) => {
     await page.locator('#project-gallery a').first().click();
     await waitForLightboxOpen(page);

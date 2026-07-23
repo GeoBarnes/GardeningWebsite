@@ -12,6 +12,19 @@
 }
 
 /* ---------------------------------------------------------------------------
+   Lightbox scroll lock
+
+   PhotoSwipe (ProjectGallery.astro) doesn't stop the document scrolling behind
+   its fixed overlay. This class, toggled on <html> while the lightbox is open,
+   does — with padding compensating for the removed scrollbar so the page behind
+   doesn't jump when the overlay fades out.
+   --------------------------------------------------------------------------- */
+html.pswp-open {
+  overflow: hidden;
+  padding-right: var(--pswp-gutter, 0);
+}
+
+/* ---------------------------------------------------------------------------
    Scroll reveal
 
    The hidden starting state is deliberately gated behind `.js`, which an inline
