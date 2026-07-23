@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import { SITE_INDEXABLE } from '../config';
 
 interface Props {
   title: string;
@@ -31,7 +33,24 @@ const navLinks = [
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} | Placeholder Gardening Co.</title>
     <meta name="description" content={description} />
-    {noindex && <meta name="robots" content="noindex" />}
+    {
+      /* While the site is a prototype every page is held back, not just the
+         ones marked noindex individually. `nofollow` too, so a crawler that
+         reaches one page does not spider outward from it. */
+      (!SITE_INDEXABLE || noindex) && (
+        <meta name="robots" content={SITE_INDEXABLE ? 'noindex' : 'noindex, nofollow'} />
+      )
+    }
+    <ClientRouter />
+    <!--
+      Marks JS as available before the first paint, which is what lets the
+      scroll-reveal CSS hide elements without risking a blank page if the
+      script never arrives. `is:inline` keeps it un-bundled and blocking —
+      it must win the race against rendering, and it is one line.
+    -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -120,39 +139,100 @@ const navLinks = [
     </footer>
 
     <script>
-      // The site's only always-present JS: a few hundred bytes to toggle the
-      // mobile nav. Everything else stays zero-JS unless a page opts in.
-      const toggle = document.getElementById('nav-toggle');
-      const menu = document.getElementById('nav-menu');
+      // The site's only always-present JS. Everything else stays zero-JS
+      // unless a page opts in.
+      //
+      // Every listener here is delegated to `document` and looks its elements
+      // up at call time. That is not stylistic: view transitions replace the
+      // <body> on each navigation, so a listener bound directly to the toggle
+      // would be thrown away with the old DOM, and one bound once to a captured
+      // element would go on pointing at a node no longer in the page. Delegation
+      // means this binds once and keeps working, with nothing to re-initialise.
 
-      if (toggle && menu) {
-        const setOpen = (open: boolean) => {
-          menu.hidden = !open;
-          toggle.setAttribute('aria-expanded', String(open));
-        };
+      const setOpen = (open: boolean) => {
+        const toggle = document.getElementById('nav-toggle');
+        const menu = document.getElementById('nav-menu');
+        if (!toggle || !menu) return;
+
+        menu.hidden = !open;
+        toggle.setAttribute('aria-expanded', String(open));
+      };
+
+      document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        if (!target.closest('#nav-toggle')) return;
 
         // `hidden` types as `boolean | string` (the `until-found` value), so
         // coerce rather than pass it straight through.
-        toggle.addEventListener('click', () => {
-          setOpen(Boolean(menu.hidden));
-        });
+        setOpen(Boolean(document.getElementById('nav-menu')?.hidden));
+      });
 
-        // Escape closes and returns focus to the toggle — otherwise keyboard
-        // users are stranded inside an open panel.
-        document.addEventListener('keydown', (event) => {
-          if (event.key === 'Escape' && !menu.hidden) {
-            setOpen(false);
-            toggle.focus();
-          }
-        });
+      // Escape closes and returns focus to the toggle — otherwise keyboard
+      // users are stranded inside an open panel.
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        const menu = document.getElementById('nav-menu');
+        if (!menu || menu.hidden) return;
 
-        // Crossing the `sm` breakpoint with the panel open would otherwise
-        // leave a stale `hidden` state behind when the desktop list takes over.
-        const desktop = window.matchMedia('(min-width: 40rem)');
-        desktop.addEventListener('change', (event) => {
-          if (event.matches) setOpen(false);
-        });
-      }
+        setOpen(false);
+        document.getElementById('nav-toggle')?.focus();
+      });
+
+      // Crossing the `sm` breakpoint with the panel open would otherwise
+      // leave a stale `hidden` state behind when the desktop list takes over.
+      window.matchMedia('(min-width: 40rem)').addEventListener('change', (event) => {
+        if (event.matches) setOpen(false);
+      });
+
+      // ---- Scroll reveal ----------------------------------------------------
+      // The CSS does the animating; this only decides when. Elements start
+      // hidden solely via the `.js` gate, so if this script fails they stay
+      // visible rather than disappearing.
+
+      let observer: IntersectionObserver | null = null;
+
+      const revealAll = (targets: NodeListOf<Element>) => {
+        targets.forEach((el) => el.setAttribute('data-revealed', ''));
+      };
+
+      const initReveal = () => {
+        const targets = document.querySelectorAll('[data-reveal]:not([data-revealed])');
+        if (targets.length === 0) return;
+
+        // Checked here rather than only in CSS so we skip the observer work
+        // entirely, and so anything below the fold is shown immediately.
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          revealAll(targets);
+          return;
+        }
+
+        observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.setAttribute('data-revealed', '');
+              // One-shot: re-animating on every scroll past is a nuisance, not
+              // a delight.
+              observer?.unobserve(entry.target);
+            }
+          },
+          // Fire a little before the element is fully in view, so the movement
+          // reads as the page settling rather than as a delayed reaction.
+          { rootMargin: '0px 0px -10% 0px' }
+        );
+
+        targets.forEach((el) => observer?.observe(el));
+      };
+
+      // Runs on first load; `astro:page-load` covers every view transition after
+      // it, where the new page arrives with its own un-revealed elements.
+      initReveal();
+      document.addEventListener('astro:page-load', initReveal);
+      document.addEventListener('astro:before-swap', () => {
+        observer?.disconnect();
+        observer = null;
+      });
     </script>
   </body>
 </html>

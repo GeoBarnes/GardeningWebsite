@@ -10,3 +10,136 @@
   --font-display: 'Fraunces', serif;
   --font-body: 'Inter', sans-serif;
 }
+
+/* ---------------------------------------------------------------------------
+   Lightbox (ProjectGallery.astro)
+
+   A minimal full-screen image viewer, built in JS on the fly, so its styles
+   have to be global rather than component-scoped. `.lightbox-open` on <html>
+   locks the document behind the overlay, with padding compensating for the
+   removed scrollbar so the page doesn't jump when the overlay closes.
+   --------------------------------------------------------------------------- */
+html.lightbox-open {
+  overflow: hidden;
+  padding-right: var(--lightbox-gutter, 0);
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgb(0 0 0 / 0.9);
+}
+
+.lightbox__img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 0.25rem;
+}
+
+.lightbox__close,
+.lightbox__nav {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: rgb(0 0 0 / 0.4);
+  color: #fff;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 9999px;
+}
+
+.lightbox__close:hover,
+.lightbox__nav:hover {
+  background: rgb(0 0 0 / 0.7);
+}
+
+.lightbox__close:focus-visible,
+.lightbox__nav:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.lightbox__close {
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.75rem;
+}
+
+.lightbox__nav {
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+}
+
+.lightbox__prev {
+  left: 1rem;
+}
+
+.lightbox__next {
+  right: 1rem;
+}
+
+.lightbox__nav[hidden] {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll reveal
+
+   The hidden starting state is deliberately gated behind `.js`, which an inline
+   script in <head> adds before the page paints. Without it — JS disabled, or the
+   script failed — `[data-reveal]` elements are simply visible, so a broken
+   enhancement can never leave the page blank. Gating in the <head> rather than
+   from the reveal script itself is what avoids a flash of visible content.
+
+   The animation is a plain CSS transition. A JS animation library would add a
+   dependency to every page to express exactly this.
+   --------------------------------------------------------------------------- */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+[data-reveal] {
+  transition:
+    opacity 600ms ease-out,
+    transform 600ms ease-out;
+}
+
+[data-reveal][data-revealed] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Show everything outright rather than animating it more gently. */
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+
+  [data-reveal] {
+    transition: none;
+  }
+
+  /* Astro's view transitions animate via the ::view-transition pseudo-elements,
+     which sit outside the document and so ignore any rule above. Disable them
+     explicitly — cross-page movement is exactly what motion sensitivity is
+     about, and this is the whole-page one. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

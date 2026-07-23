@@ -10,10 +10,9 @@ import { z } from 'zod';
  * in content.config.ts, so the tests validate exactly what the build enforces.
  */
 /**
- * A gallery image. Dimensions are required rather than optional because
- * PhotoSwipe needs the intrinsic size before the full image loads — without
- * them the lightbox opens at the wrong scale and the page shifts. They also
- * let us set width/height on the thumbnail, which prevents layout shift.
+ * A gallery image. Dimensions are required rather than optional so the
+ * thumbnail can carry width/height, which reserves its space and prevents the
+ * layout shifting as images load.
  */
 const imageSchema = z.object({
   src: z.string(),

@@ -66,6 +66,12 @@ test.describe('mobile nav', () => {
   // panel — the state a phone user actually navigates in — would otherwise go
   // unchecked entirely.
   test('has no accessibility violations while open', async ({ page }) => {
+    // Reduced motion for the same reason as tests/a11y/accessibility.spec.ts:
+    // it pins the scroll-reveal elements to their settled state so axe cannot
+    // sample one mid-fade and report a contrast failure that lasts 600ms.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.reload();
+
     await page.getByRole('button', { name: /menu/i }).click();
     await expect(page.locator('#nav-menu')).toBeVisible();
 
