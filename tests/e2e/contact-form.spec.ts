@@ -22,11 +22,69 @@ test.describe('contact form', () => {
     await expect(form).toHaveAttribute('action', /^https:\/\/formspree\.io\/f\/\w+$/);
   });
 
-  test('submits with no JavaScript, as a plain HTML POST', async ({ page }) => {
-    // The reason we chose the Basic HTML integration: no bundle to fail. If a
-    // future change reintroduces an AJAX handler this catches it.
-    await expect(page.locator('form script')).toHaveCount(0);
-    await expect(page.locator('form [type="submit"]')).toBeVisible();
+  test('still submits to Formspree when JavaScript is off', async ({ browser }) => {
+    // The enhancement must never be load-bearing: with no JS the form is a plain
+    // POST that still reaches Formspree (that path just lands on their own page).
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    let postedTo: string | null = null;
+    await page.route('**/formspree.io/**', async (route) => {
+      postedTo = route.request().method();
+      await route.fulfill({ status: 200, contentType: 'text/html', body: 'ok' });
+    });
+
+    await page.goto('/contact/');
+    await page.fill('[name="name"]', 'Test Person');
+    await page.fill('[name="email"]', 'test@example.com');
+    await page.fill('[name="message"]', 'A message.');
+    await page.click('[type="submit"]');
+
+    await expect.poll(() => postedTo).toBe('POST');
+    await context.close();
+  });
+
+  test('with JS, redirects to our own thank-you page on success', async ({ page }) => {
+    // The whole point of the enhancement: intercept the submit, post via fetch,
+    // and send the visitor to /contact/thanks/ so they never see Formspree's
+    // branded page (which the free plan shows regardless of `_next`).
+    await page.route('**/formspree.io/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true }),
+      });
+    });
+
+    await page.fill('[name="name"]', 'Test Person');
+    await page.fill('[name="email"]', 'test@example.com');
+    await page.fill('[name="message"]', 'A message.');
+    await page.click('[type="submit"]');
+
+    await expect(page).toHaveURL(/\/contact\/thanks\/$/);
+  });
+
+  test('falls back to a normal submission if the fetch fails', async ({ page }) => {
+    // A failed AJAX attempt must not strand the visitor: it reverts to a plain
+    // POST rather than silently doing nothing.
+    let nativePost = false;
+    await page.route('**/formspree.io/**', async (route) => {
+      const accept = route.request().headers()['accept'] ?? '';
+      if (accept.includes('application/json')) {
+        // The fetch attempt errors.
+        await route.fulfill({ status: 500, contentType: 'application/json', body: '{}' });
+      } else {
+        // The fallback native navigation POST.
+        nativePost = true;
+        await route.fulfill({ status: 200, contentType: 'text/html', body: 'ok' });
+      }
+    });
+
+    await page.fill('[name="name"]', 'Test Person');
+    await page.fill('[name="email"]', 'test@example.com');
+    await page.fill('[name="message"]', 'A message.');
+    await page.click('[type="submit"]');
+
+    await expect.poll(() => nativePost).toBe(true);
   });
 
   test('redirects back to our own thank-you page after submitting', async ({ page }) => {

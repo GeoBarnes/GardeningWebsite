@@ -18,11 +18,19 @@ const thanksUrl = new URL('/contact/thanks/', Astro.site).href;
     </p>
 
     <!--
-      Plain HTML POST, no JavaScript. Formspree's AJAX SDK would add a bundle to
-      buy inline validation the browser already does natively, and would make
-      the form stop working entirely if the script failed to load.
+      Progressive enhancement. The markup is a real HTML POST to Formspree, so
+      it works with no JavaScript — that path just lands on Formspree's own
+      confirmation page. The script at the end of this file intercepts the
+      submit, posts via `fetch`, and sends the visitor to our own
+      /contact/thanks/ page instead. It's a few hundred hand-rolled bytes, not
+      Formspree's SDK, and if the request fails for any reason it falls straight
+      back to the plain POST — so the form can't be broken by the script.
+
+      This matters because on Formspree's free plan the `_next` redirect below is
+      ignored and every submission lands on their branded page; doing the
+      redirect ourselves is what actually keeps people on her site.
     -->
-    <form class="space-y-4" method="POST" action={FORMSPREE_ENDPOINT}>
+    <form id="contact-form" class="space-y-4" method="POST" action={FORMSPREE_ENDPOINT}>
       <!-- Without this, every enquiry arrives titled "New submission". -->
       <input type="hidden" name="_subject" value="New enquiry from the website" />
       <!-- Return to our own thank-you page instead of Formspree's branded one. -->
@@ -85,3 +93,48 @@ const thanksUrl = new URL('/contact/thanks/', Astro.site).href;
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  // Submit the contact form via fetch and handle the redirect ourselves, so the
+  // visitor lands on our thank-you page rather than Formspree's branded one (a
+  // plain POST hits that on the free plan, which ignores `_next`). Delegated to
+  // `document`, which persists across Astro's view-transition body swaps, so it
+  // keeps working without any per-navigation re-init.
+  document.addEventListener('submit', async (event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement) || form.id !== 'contact-form') return;
+    event.preventDefault();
+
+    const button = form.querySelector('button[type="submit"]');
+    if (button instanceof HTMLButtonElement) button.disabled = true;
+
+    // Anything unexpected — an error from Formspree, a network failure — falls
+    // back to a normal POST. `form.submit()` bypasses this handler, so no loop.
+    const fallback = () => {
+      if (button instanceof HTMLButtonElement) button.disabled = false;
+      form.submit();
+    };
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) {
+        fallback();
+        return;
+      }
+      // Redirect same-origin, deriving the path from `_next` so there's one
+      // source of truth for it (its value is absolute, for the no-JS fallback).
+      const next = form.querySelector('input[name="_next"]');
+      const path =
+        next instanceof HTMLInputElement && next.value
+          ? new URL(next.value).pathname
+          : '/contact/thanks/';
+      window.location.href = path;
+    } catch {
+      fallback();
+    }
+  });
+</script>
