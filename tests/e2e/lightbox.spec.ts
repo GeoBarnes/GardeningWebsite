@@ -1,42 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-
-const backdropOpacity = (page: Page) =>
-  page.evaluate(() => {
-    const bg = document.querySelector('.pswp__bg');
-    return bg ? parseFloat(getComputedStyle(bg).opacity) : -1;
-  });
-
-/**
- * Waits until PhotoSwipe's opening animation has genuinely finished.
- *
- * This needs to be the *end* of the transition, not merely "something is
- * visible", and neither of the obvious signals is good enough: `.pswp` appears
- * immediately and the `pswp--ui-visible` class lands at ~158ms, both while the
- * backdrop is still fading. Asserting that early produces two distinct false
- * results — an axe sweep measures the overlay's white text against the page
- * still showing through and reports a contrast failure that does not exist
- * once open, and PhotoSwipe silently ignores Escape until the opener completes.
- *
- * So poll the backdrop until its opacity stops changing (~575ms), which holds
- * regardless of the library's final opacity value or animation duration.
- */
-async function waitForLightboxOpen(page: Page) {
-  await expect(page.locator('.pswp')).toBeVisible();
-
-  let previous = -1;
-  await expect
-    .poll(
-      async () => {
-        const current = await backdropOpacity(page);
-        const settled = current > 0.5 && Math.abs(current - previous) < 0.0001;
-        previous = current;
-        return settled;
-      },
-      { intervals: Array(40).fill(50) }
-    )
-    .toBe(true);
-}
 
 test.describe('project gallery lightbox', () => {
   test.beforeEach(async ({ page }) => {
@@ -44,48 +7,86 @@ test.describe('project gallery lightbox', () => {
   });
 
   test('thumbnails link to the full image, so the gallery works without JS', async ({ page }) => {
-    // Progressive enhancement: the markup is plain anchors. If PhotoSwipe fails
+    // Progressive enhancement: the markup is plain anchors. If the script fails
     // to load, clicking a thumbnail still opens the image rather than nothing.
     const first = page.locator('#project-gallery a').first();
     await expect(first).toHaveAttribute('href', /^https?:\/\//);
-    // PhotoSwipe needs intrinsic dimensions up front to size the overlay.
-    await expect(first).toHaveAttribute('data-pswp-width', /^\d+$/);
-    await expect(first).toHaveAttribute('data-pswp-height', /^\d+$/);
   });
 
-  test('opens an overlay when a thumbnail is clicked', async ({ page }) => {
+  test('opens a centred overlay when a thumbnail is clicked', async ({ page }) => {
     await page.locator('#project-gallery a').first().click();
-    await waitForLightboxOpen(page);
-    await expect(page.locator('.pswp img.pswp__img').first()).toBeVisible();
+
+    const overlay = page.locator('#lightbox');
+    await expect(overlay).toBeVisible();
+    // The bug this guards against: the overlay opening below the fold, so only a
+    // slice showed at the top. It must be a fixed layer covering the viewport.
+    await expect(overlay).toHaveCSS('position', 'fixed');
+    const box = await overlay.boundingBox();
+    const viewport = page.viewportSize()!;
+    expect(box).toMatchObject({ x: 0, y: 0 });
+    expect(box!.width).toBeCloseTo(viewport.width, 0);
+    expect(box!.height).toBeCloseTo(viewport.height, 0);
+
+    await expect(page.locator('#lightbox .lightbox__img')).toBeVisible();
+  });
+
+  test('shows the image that was actually clicked', async ({ page }) => {
+    // Oak Lane has two images; clicking the second must show the second.
+    const second = page.locator('#project-gallery a').nth(1);
+    const href = await second.getAttribute('href');
+    await second.click();
+    await expect(page.locator('#lightbox .lightbox__img')).toHaveAttribute('src', href!);
   });
 
   test('closes on Escape, removing the overlay entirely', async ({ page }) => {
     await page.locator('#project-gallery a').first().click();
-    await waitForLightboxOpen(page);
+    await expect(page.locator('#lightbox')).toBeVisible();
 
     await page.keyboard.press('Escape');
-    await expect(page.locator('.pswp')).toHaveCount(0);
+    await expect(page.locator('#lightbox')).toHaveCount(0);
+  });
+
+  test('closes when the backdrop is clicked', async ({ page }) => {
+    await page.locator('#project-gallery a').first().click();
+    await expect(page.locator('#lightbox')).toBeVisible();
+
+    // Click the top-left corner, which is backdrop rather than the centred image.
+    await page.locator('#lightbox').click({ position: { x: 5, y: 5 } });
+    await expect(page.locator('#lightbox')).toHaveCount(0);
+  });
+
+  test('moves between images with the arrow keys', async ({ page }) => {
+    const hrefs = await page
+      .locator('#project-gallery a')
+      .evaluateAll((els) => els.map((el) => el.getAttribute('href')));
+    test.skip(hrefs.length < 2, 'needs at least two images to page between');
+
+    await page.locator('#project-gallery a').first().click();
+    const img = page.locator('#lightbox .lightbox__img');
+    await expect(img).toHaveAttribute('src', hrefs[0]!);
+
+    await page.keyboard.press('ArrowRight');
+    await expect(img).toHaveAttribute('src', hrefs[1]!);
+
+    await page.keyboard.press('ArrowLeft');
+    await expect(img).toHaveAttribute('src', hrefs[0]!);
   });
 
   test('is fully operable by keyboard, with focus moving in and back out', async ({ page }) => {
-    // The path that matters for accessibility. Opened by pointer, PhotoSwipe
-    // deliberately leaves focus on the thumbnail (it pulls focus in on Tab
-    // instead); opened by keyboard it must move focus into the dialog, or a
-    // keyboard user has no idea anything happened.
+    // Opened from the keyboard, focus must move into the dialog, and on close
+    // return to the thumbnail — not the top of the document.
     const first = page.locator('#project-gallery a').first();
     await first.focus();
     await page.keyboard.press('Enter');
-    await waitForLightboxOpen(page);
 
     await expect
       .poll(() =>
-        page.evaluate(() => !!document.querySelector('.pswp')?.contains(document.activeElement))
+        page.evaluate(() => !!document.getElementById('lightbox')?.contains(document.activeElement))
       )
       .toBe(true);
 
     await page.keyboard.press('Escape');
-    await expect(page.locator('.pswp')).toHaveCount(0);
-    // Focus must come back to where it started, not to the top of the document.
+    await expect(page.locator('#lightbox')).toHaveCount(0);
     await expect(first).toBeFocused();
   });
 
@@ -94,40 +95,31 @@ test.describe('project gallery lightbox', () => {
     expect(thumbAlt).toBeTruthy();
 
     await page.locator('#project-gallery a').first().click();
-    await waitForLightboxOpen(page);
     // An unlabelled full-screen image is the classic lightbox a11y failure.
-    await expect(page.locator('.pswp img.pswp__img').first()).toHaveAttribute(
+    await expect(page.locator('#lightbox .lightbox__img')).toHaveAttribute(
       'alt',
       thumbAlt as string
     );
   });
 
   test('locks the document behind the overlay, and unlocks it on close', async ({ page }) => {
-    // PhotoSwipe doesn't stop the page scrolling behind its fixed overlay, so
-    // the background used to scroll away underneath the lightbox — it read as
-    // the overlay sticking mid-page, worst on Safari and phones. The lock is a
-    // class on <html>; it must go on when the lightbox opens and off when it
-    // closes, or the whole page is left unscrollable.
-    await expect(page.locator('html')).not.toHaveClass(/pswp-open/);
+    // The page must not scroll behind the fixed overlay. The lock is a class on
+    // <html>; it goes on when the lightbox opens and off when it closes.
+    await expect(page.locator('html')).not.toHaveClass(/lightbox-open/);
 
     await page.locator('#project-gallery a').first().click();
-    await waitForLightboxOpen(page);
-    await expect(page.locator('html')).toHaveClass(/pswp-open/);
+    await expect(page.locator('html')).toHaveClass(/lightbox-open/);
     await expect(page.locator('html')).toHaveCSS('overflow-y', 'hidden');
 
     await page.keyboard.press('Escape');
-    await expect(page.locator('.pswp')).toHaveCount(0);
-    await expect(page.locator('html')).not.toHaveClass(/pswp-open/);
+    await expect(page.locator('#lightbox')).toHaveCount(0);
+    await expect(page.locator('html')).not.toHaveClass(/lightbox-open/);
   });
 
-  test('a double-click opens the lightbox without navigating or opening a tab', async ({
-    page,
-    context,
-  }) => {
-    // PhotoSwipe ignores clicks while already open and lets the link's default
-    // navigation fire, so the second click of a double-click followed the href
-    // to the bare image. Both the removed target="_blank" and the guard that
-    // swallows the stray click keep a double-click on-page.
+  test('a double-click never navigates away or opens a tab', async ({ page, context }) => {
+    // The original complaint: a double-click's second click followed the link to
+    // the bare image in a new tab. The delegated handler always prevents the
+    // link's default, so the visitor stays on the page whatever the click count.
     let openedTab = false;
     context.on('page', () => {
       openedTab = true;
@@ -135,7 +127,8 @@ test.describe('project gallery lightbox', () => {
     const startUrl = page.url();
 
     await page.locator('#project-gallery a').first().dblclick();
-    await waitForLightboxOpen(page);
+    // Give any stray navigation or popup a moment to happen.
+    await page.waitForTimeout(300);
 
     expect(openedTab).toBe(false);
     expect(page.url()).toBe(startUrl);
@@ -143,7 +136,7 @@ test.describe('project gallery lightbox', () => {
 
   test('has no accessibility violations while open', async ({ page }) => {
     await page.locator('#project-gallery a').first().click();
-    await waitForLightboxOpen(page);
+    await expect(page.locator('#lightbox')).toBeVisible();
 
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
     expect(results.violations).toEqual([]);

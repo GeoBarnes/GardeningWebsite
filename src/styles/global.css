@@ -12,16 +12,86 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Lightbox scroll lock
+   Lightbox (ProjectGallery.astro)
 
-   PhotoSwipe (ProjectGallery.astro) doesn't stop the document scrolling behind
-   its fixed overlay. This class, toggled on <html> while the lightbox is open,
-   does — with padding compensating for the removed scrollbar so the page behind
-   doesn't jump when the overlay fades out.
+   A minimal full-screen image viewer, built in JS on the fly, so its styles
+   have to be global rather than component-scoped. `.lightbox-open` on <html>
+   locks the document behind the overlay, with padding compensating for the
+   removed scrollbar so the page doesn't jump when the overlay closes.
    --------------------------------------------------------------------------- */
-html.pswp-open {
+html.lightbox-open {
   overflow: hidden;
-  padding-right: var(--pswp-gutter, 0);
+  padding-right: var(--lightbox-gutter, 0);
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgb(0 0 0 / 0.9);
+}
+
+.lightbox__img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 0.25rem;
+}
+
+.lightbox__close,
+.lightbox__nav {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: rgb(0 0 0 / 0.4);
+  color: #fff;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 9999px;
+}
+
+.lightbox__close:hover,
+.lightbox__nav:hover {
+  background: rgb(0 0 0 / 0.7);
+}
+
+.lightbox__close:focus-visible,
+.lightbox__nav:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.lightbox__close {
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.75rem;
+}
+
+.lightbox__nav {
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+}
+
+.lightbox__prev {
+  left: 1rem;
+}
+
+.lightbox__next {
+  right: 1rem;
+}
+
+.lightbox__nav[hidden] {
+  display: none;
 }
 
 /* ---------------------------------------------------------------------------

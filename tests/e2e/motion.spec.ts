@@ -90,8 +90,9 @@ test.describe('view transitions', () => {
   });
 
   test('the lightbox still opens after a client-side navigation', async ({ page }) => {
-    // Same class of bug on the other side: the lightbox must be rebuilt against
-    // the incoming gallery rather than the one it first bound to.
+    // Same class of bug on the other side: the lightbox is delegated to
+    // `document`, which survives the swap, so it must still open a fresh overlay
+    // on a page reached by a client-side navigation.
     await page.goto('/portfolio/');
     await markDocument(page);
 
@@ -100,7 +101,30 @@ test.describe('view transitions', () => {
     expect(await documentSurvived(page)).toBe(true);
 
     await page.locator('#project-gallery a').first().click();
-    await expect(page.locator('.pswp')).toBeVisible();
+    await expect(page.locator('#lightbox')).toBeVisible();
+  });
+
+  test('the lightbox still opens after leaving a project and returning', async ({ page }) => {
+    // The exact flow that broke with PhotoSwipe: open a gallery, go back, come
+    // back to it, and open again. The overlay must appear centred, not below
+    // the fold, on the second visit too.
+    await page.goto('/portfolio/willow-cottage-patio/');
+
+    await page.locator('#project-gallery a').first().click();
+    await expect(page.locator('#lightbox')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#lightbox')).toHaveCount(0);
+
+    await page.getByRole('link', { name: /Back to portfolio/ }).click();
+    await expect(page).toHaveURL(/\/portfolio\/$/);
+    await page.getByRole('link', { name: /Willow Cottage/ }).click();
+    await expect(page).toHaveURL(/willow-cottage-patio/);
+
+    await page.locator('#project-gallery a').first().click();
+    const overlay = page.locator('#lightbox');
+    await expect(overlay).toBeVisible();
+    const box = await overlay.boundingBox();
+    expect(box).toMatchObject({ x: 0, y: 0 });
   });
 
   test('scroll reveal re-arms on the page navigated to', async ({ page }) => {

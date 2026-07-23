@@ -1,9 +1,16 @@
 ---
-// Thumbnail grid that opens into a PhotoSwipe lightbox.
+// Thumbnail grid that opens a full-screen lightbox.
 //
 // The markup is a plain list of links to the full-size images, so it still
 // works with JS disabled — clicking a thumbnail just opens the image directly.
-// PhotoSwipe enhances that into an overlay gallery.
+// The script below enhances that into a centred overlay.
+//
+// This is a deliberately minimal, dependency-free lightbox. It replaced
+// PhotoSwipe, whose per-page rebuild kept fighting Astro's view transitions
+// (stale global state, an overlay bound to a swapped-out DOM). Everything here
+// is delegated to `document`, which persists across a client-side navigation,
+// and the overlay is built fresh on each open — so there is no lifecycle to get
+// out of sync with the page.
 import type { ProjectImage } from '../content/schema';
 
 interface Props {
@@ -20,8 +27,6 @@ const { images, title } = Astro.props;
     images.map((image) => (
       <a
         href={image.src}
-        data-pswp-width={image.width}
-        data-pswp-height={image.height}
         class="block rounded-lg overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
       >
         <img
@@ -38,65 +43,138 @@ const { images, title } = Astro.props;
 </div>
 
 <script>
-  import PhotoSwipeLightbox from 'photoswipe/lightbox';
-  import 'photoswipe/style.css';
+  interface LightboxImage {
+    src: string;
+    alt: string;
+  }
 
-  // View transitions swap the document without reloading it, so a lightbox
-  // bound on first load would be left pointing at a gallery that is no longer
-  // in the page. Rebuild it per page, and tear the old one down.
-  let lightbox: PhotoSwipeLightbox | null = null;
+  // The one piece of open/closed state. Null means the lightbox is closed.
+  let state: { images: LightboxImage[]; index: number; trigger: HTMLElement } | null = null;
 
-  const init = () => {
-    // Guarded because this runs both directly and from `astro:page-load`, and
-    // which of the two fires first depends on whether this module had already
-    // been loaded by an earlier page.
-    if (lightbox || !document.getElementById('project-gallery')) return;
+  const overlayEl = () => document.getElementById('lightbox');
 
-    lightbox = new PhotoSwipeLightbox({
-      gallery: '#project-gallery',
-      children: 'a',
-      // The core module is a dynamic import, so its weight lands only when a
-      // visitor actually opens an image rather than on page load.
-      pswpModule: () => import('photoswipe'),
-    });
-
-    // PhotoSwipe doesn't lock the document behind the overlay — it only stops
-    // scroll on the layer it owns. Without this the page keeps scrolling behind
-    // the fixed lightbox (very visible in Safari and on phones, where it reads
-    // as the overlay "sticking" mid-page). Lock <html> while it's open and
-    // compensate for the vanished scrollbar so nothing jumps on close.
-    lightbox.on('beforeOpen', () => {
-      const gutter = window.innerWidth - document.documentElement.clientWidth;
-      document.documentElement.style.setProperty('--pswp-gutter', `${gutter}px`);
-      document.documentElement.classList.add('pswp-open');
-    });
-    lightbox.on('close', () => {
-      document.documentElement.classList.remove('pswp-open');
-    });
-
-    // No alt-text wiring needed: PhotoSwipe copies each thumbnail's `alt` onto
-    // the full-size image itself, so the overlay is labelled for screen readers
-    // as long as the thumbnails are.
-    lightbox.init();
-
-    // Once the lightbox is open PhotoSwipe deliberately ignores further clicks
-    // on the thumbnails and lets the browser follow the link (see its
-    // `onThumbnailsClick`: it returns early while `window.pswp` is set). So the
-    // second click of a double-click navigated to the raw image. Swallow any
-    // thumbnail click while the lightbox is open — PhotoSwipe owns the UI then.
-    // The link stays live with JS disabled, which is the whole point of it.
-    document.getElementById('project-gallery')?.addEventListener('click', (event) => {
-      const openLightbox = (window as unknown as { pswp?: unknown }).pswp;
-      if (openLightbox && (event.target as HTMLElement).closest('a')) {
-        event.preventDefault();
-      }
-    });
+  const buildOverlay = () => {
+    const overlay = document.createElement('div');
+    overlay.id = 'lightbox';
+    overlay.className = 'lightbox';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Image viewer');
+    overlay.innerHTML = `
+      <button class="lightbox__close" type="button" aria-label="Close image viewer">&times;</button>
+      <button class="lightbox__nav lightbox__prev" type="button" aria-label="Previous image">&lsaquo;</button>
+      <img class="lightbox__img" alt="" />
+      <button class="lightbox__nav lightbox__next" type="button" aria-label="Next image">&rsaquo;</button>
+    `;
+    return overlay;
   };
 
-  init();
-  document.addEventListener('astro:page-load', init);
+  const render = () => {
+    const overlay = overlayEl();
+    if (!overlay || !state) return;
+    const current = state.images[state.index];
+    const img = overlay.querySelector('.lightbox__img') as HTMLImageElement;
+    img.src = current.src;
+    img.alt = current.alt;
+    // Only offer prev/next when there's more than one image to move between.
+    const many = state.images.length > 1;
+    (overlay.querySelector('.lightbox__prev') as HTMLElement).hidden = !many;
+    (overlay.querySelector('.lightbox__next') as HTMLElement).hidden = !many;
+  };
+
+  const step = (delta: number) => {
+    if (!state) return;
+    state.index = (state.index + delta + state.images.length) % state.images.length;
+    render();
+  };
+
+  const close = () => {
+    overlayEl()?.remove();
+    document.documentElement.classList.remove('lightbox-open');
+    // Return focus to the thumbnail that opened the lightbox, not the top of
+    // the page, so a keyboard user keeps their place.
+    state?.trigger.focus();
+    state = null;
+  };
+
+  const open = (images: LightboxImage[], index: number, trigger: HTMLElement) => {
+    if (state) close();
+    state = { images, index, trigger };
+
+    // Lock the document behind the overlay, compensating for the removed
+    // scrollbar so the page doesn't jump when the overlay closes.
+    const gutter = window.innerWidth - document.documentElement.clientWidth;
+    document.documentElement.style.setProperty('--lightbox-gutter', `${gutter}px`);
+    document.documentElement.classList.add('lightbox-open');
+
+    const overlay = buildOverlay();
+    overlay.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      // A click on the backdrop itself (not the image or a button) closes.
+      if (target === overlay || target.closest('.lightbox__close')) close();
+      else if (target.closest('.lightbox__prev')) step(-1);
+      else if (target.closest('.lightbox__next')) step(1);
+    });
+    document.body.appendChild(overlay);
+    render();
+    (overlay.querySelector('.lightbox__close') as HTMLElement).focus();
+  };
+
+  // Delegated on `document`, which persists across Astro's view transitions —
+  // so this keeps working on every page without any per-navigation re-init.
+  document.addEventListener('click', (event) => {
+    const mouse = event as MouseEvent;
+    // Let modifier/middle clicks fall through to the browser (open in new tab).
+    if (mouse.button !== 0 || mouse.metaKey || mouse.ctrlKey || mouse.shiftKey || mouse.altKey) {
+      return;
+    }
+    const link = (event.target as HTMLElement).closest('#project-gallery a');
+    if (!link) return;
+    event.preventDefault();
+
+    const anchors = Array.from(document.querySelectorAll<HTMLAnchorElement>('#project-gallery a'));
+    const images: LightboxImage[] = anchors.map((anchor) => ({
+      src: anchor.getAttribute('href') ?? '',
+      alt: anchor.querySelector('img')?.alt ?? '',
+    }));
+    open(images, anchors.indexOf(link as HTMLAnchorElement), link as HTMLElement);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (!state) return;
+    if (event.key === 'Escape') {
+      close();
+    } else if (event.key === 'ArrowLeft') {
+      step(-1);
+    } else if (event.key === 'ArrowRight') {
+      step(1);
+    } else if (event.key === 'Tab') {
+      // Keep focus inside the dialog while it's open.
+      const overlay = overlayEl();
+      if (!overlay) return;
+      const focusable = Array.from(overlay.querySelectorAll<HTMLElement>('button')).filter(
+        (button) => !button.hidden
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (!overlay.contains(active)) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  });
+
+  // Don't leave a scroll lock or a detached overlay behind if the visitor
+  // navigates while the lightbox is open.
   document.addEventListener('astro:before-swap', () => {
-    lightbox?.destroy();
-    lightbox = null;
+    if (state) close();
   });
 </script>
