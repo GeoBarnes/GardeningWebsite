@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import LocalBusinessSchema from '../components/LocalBusinessSchema.astro';
+import { BUSINESS } from '../config';
 
 // Formspree endpoint. Safe to commit: it is a public identifier that ships in
 // the page HTML by definition, so an env var would hide nothing.
@@ -11,6 +13,7 @@ const thanksUrl = new URL('/contact/thanks/', Astro.site).href;
 ---
 
 <BaseLayout title="Contact">
+  <LocalBusinessSchema slot="head" />
   <section class="max-w-2xl mx-auto px-6 py-16">
     <h1 class="font-display text-3xl mb-2">Contact</h1>
     <p class="text-forest/80 mb-8">
@@ -88,8 +91,12 @@ const thanksUrl = new URL('/contact/thanks/', Astro.site).href;
 
     <div class="mt-10 pt-8 border-t border-earth-light/40 text-forest/80 text-sm">
       <p>Prefer to call or email directly?</p>
-      <p class="mt-1">Phone: <a href="tel:+447000000000" class="underline">07000 000000</a></p>
-      <p>Email: <a href="mailto:hello@example.com" class="underline">hello@example.com</a></p>
+      <p class="mt-1">
+        Phone: <a href={`tel:${BUSINESS.telephone}`} class="underline"
+          >{BUSINESS.telephoneDisplay}</a
+        >
+      </p>
+      <p>Email: <a href={`mailto:${BUSINESS.email}`} class="underline">{BUSINESS.email}</a></p>
     </div>
   </section>
 </BaseLayout>

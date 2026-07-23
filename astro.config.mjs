@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
+import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,6 +15,14 @@ export default defineConfig({
   // to `/about/`. Emitting the canonical form ourselves avoids that extra
   // round-trip on every internal navigation.
   trailingSlash: 'always',
+  integrations: [
+    // Auto-generated sitemap-index.xml / sitemap-0.xml, read by `Sitemap:` in
+    // robots.txt once the site is indexable. `/contact/thanks/` is excluded —
+    // it's noindex and only makes sense as the end of the form journey.
+    sitemap({
+      filter: (page) => !page.includes('/contact/thanks/'),
+    }),
+  ],
   vite: {
     plugins: [tailwindcss()],
   },

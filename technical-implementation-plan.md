@@ -266,7 +266,11 @@ View transitions (`<ClientRouter />`) are the larger change, because they alter 
 
 **The cost, stated plainly:** every page now downloads the ~15.7KB (~6KB gzipped) ClientRouter bundle, where before the only always-present JS was a few hundred inlined bytes. Lighthouse performance is unaffected (1.0 on most routes, 0.94 on the portfolio index), but the "zero JS by default" claim is now "one small bundle by default". Worth revisiting if the wow factor turns out not to earn it.
 
-Still to build: JSON-LD/SEO tags, sitemap, real photos and copy.
+**Phase 9 is done.** Every page now carries canonical, Open Graph and Twitter Card meta (built from `site`, so they're the production origin even when previewed on localhost), fed a per-page `head` slot on `BaseLayout`. About and Contact — the two pages actually about the business — emit a `LocalBusiness` JSON-LD block. `@astrojs/sitemap` generates `sitemap-index.xml` (excluding the noindex `/contact/thanks/`), and `robots.txt` gains a `Sitemap:` line once indexable.
+
+The one structural change worth noting: the business's name, description, phone, email and service area now live in a single `BUSINESS` object in `src/config.ts`, which feeds the visible footer/contact details _and_ the JSON-LD — so they can't disagree, which is exactly the name/phone/email consistency search engines reward. The share image defaults to a `placehold.co` box (`DEFAULT_OG_IMAGE`) like the rest of the prototype, valid now and an obvious swap for a real photo in Phase 7. All of this is `noindex` until launch, so it's dormant but correct; `tests/e2e/seo.spec.ts` covers it.
+
+Still to build: real photos and copy (Phase 7), then the launch checklist (Phase 10) — including a real OG image and flipping `SITE_INDEXABLE`.
 
 **Note on Lighthouse SEO warnings:** every route now scores ~0.63 on SEO because Lighthouse flags "page is blocked from indexing". That is the deliberate pre-launch `noindex`, not a regression, and it will clear when `SITE_INDEXABLE` is flipped at launch. The Lighthouse job is advisory and never blocks a merge.
 
