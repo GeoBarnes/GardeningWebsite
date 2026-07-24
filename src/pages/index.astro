@@ -1,15 +1,38 @@
 ---
+import { Picture } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Testimonials from '../components/Testimonials.astro';
+import heroImage from '../assets/hero-pond.jpeg';
 ---
 
 <BaseLayout title="Home">
   <section
-    class="relative flex items-center justify-center min-h-[70vh] bg-forest text-white text-center px-6"
+    class="relative flex items-center justify-center min-h-[70vh] bg-forest text-white text-center px-6 overflow-hidden"
   >
-    <div class="max-w-2xl">
+    {
+      /* Full-bleed hero photo. Eager + high priority because it's the LCP
+         element — the first thing seen — so it must not lazy-load. `<Image>`
+         emits responsive, optimised sources; the `bg-forest` on the section is
+         what the a11y sweep measures the text against, so contrast holds no
+         matter what the photo is doing behind the scrim. */
+    }
+    <Picture
+      src={heroImage}
+      formats={['avif', 'webp']}
+      alt=""
+      aria-hidden="true"
+      loading="eager"
+      fetchpriority="high"
+      quality={55}
+      widths={[640, 960, 1280, 1600]}
+      sizes="100vw"
+      class="absolute inset-0 h-full w-full object-cover"
+    />
+    <!-- Scrim: keeps the white heading legible over any part of the image. -->
+    <div class="absolute inset-0 bg-forest/55"></div>
+    <div class="relative max-w-2xl">
       <h1 class="font-display text-4xl sm:text-5xl mb-4">Gardens that feel alive</h1>
-      <p class="text-lg text-white/80 mb-8">
+      <p class="text-lg text-white/90 mb-8">
         Thoughtful garden design, planting and care — from wildlife ponds and wisteria-clad pergolas
         to borders layered for colour through every season.
       </p>
