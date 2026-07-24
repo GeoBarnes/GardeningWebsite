@@ -122,23 +122,38 @@ const { images, title } = Astro.props;
 
   // Delegated on `document`, which persists across Astro's view transitions —
   // so this keeps working on every page without any per-navigation re-init.
-  document.addEventListener('click', (event) => {
-    const mouse = event as MouseEvent;
-    // Let modifier/middle clicks fall through to the browser (open in new tab).
-    if (mouse.button !== 0 || mouse.metaKey || mouse.ctrlKey || mouse.shiftKey || mouse.altKey) {
-      return;
-    }
-    const link = (event.target as HTMLElement).closest('#project-gallery a');
-    if (!link) return;
-    event.preventDefault();
+  //
+  // Capture phase, deliberately. The thumbnails link to same-origin image files,
+  // and Astro's ClientRouter has its own bubble-phase click handler that treats
+  // a same-origin link as a page navigation — registered in <head>, so it runs
+  // before this one and would navigate to the raw .jpeg before we could act. It
+  // does, however, bail when `defaultPrevented` is already set. Running in the
+  // capture phase lets us preventDefault first, so the router stands down. (The
+  // old placeholder images were cross-origin, which the router ignores, so this
+  // only surfaced once real photos landed.)
+  document.addEventListener(
+    'click',
+    (event) => {
+      const mouse = event as MouseEvent;
+      // Let modifier/middle clicks fall through to the browser (open in new tab).
+      if (mouse.button !== 0 || mouse.metaKey || mouse.ctrlKey || mouse.shiftKey || mouse.altKey) {
+        return;
+      }
+      const link = (event.target as HTMLElement).closest('#project-gallery a');
+      if (!link) return;
+      event.preventDefault();
 
-    const anchors = Array.from(document.querySelectorAll<HTMLAnchorElement>('#project-gallery a'));
-    const images: LightboxImage[] = anchors.map((anchor) => ({
-      src: anchor.getAttribute('href') ?? '',
-      alt: anchor.querySelector('img')?.alt ?? '',
-    }));
-    open(images, anchors.indexOf(link as HTMLAnchorElement), link as HTMLElement);
-  });
+      const anchors = Array.from(
+        document.querySelectorAll<HTMLAnchorElement>('#project-gallery a')
+      );
+      const images: LightboxImage[] = anchors.map((anchor) => ({
+        src: anchor.getAttribute('href') ?? '',
+        alt: anchor.querySelector('img')?.alt ?? '',
+      }));
+      open(images, anchors.indexOf(link as HTMLAnchorElement), link as HTMLElement);
+    },
+    true
+  );
 
   document.addEventListener('keydown', (event) => {
     if (!state) return;

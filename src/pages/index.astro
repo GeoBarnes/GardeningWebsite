@@ -1,18 +1,51 @@
 ---
+import { Picture } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Testimonials from '../components/Testimonials.astro';
+import heroImage from '../assets/hero-pond.jpeg';
 ---
 
 <BaseLayout title="Home">
   <section
-    class="relative flex items-center justify-center min-h-[70vh] bg-forest text-white text-center px-6"
+    class="relative flex items-center justify-center min-h-[70vh] bg-forest text-white text-center px-6 overflow-hidden"
   >
-    <div class="max-w-2xl">
-      <h1 class="font-display text-4xl sm:text-5xl mb-4">
-        Placeholder hero headline about beautiful gardens
+    {
+      /* Full-bleed hero photo. Eager + high priority because it's the LCP
+         element — the first thing seen — so it must not lazy-load. `<Picture>`
+         emits responsive, optimised sources; the `bg-forest` on the section is
+         what the a11y sweep measures the text against, so contrast holds no
+         matter what the photo is doing behind the scrim. A gentle saturation
+         lift makes the garden's colour pop. */
+    }
+    <Picture
+      src={heroImage}
+      formats={['avif', 'webp']}
+      alt=""
+      aria-hidden="true"
+      loading="eager"
+      fetchpriority="high"
+      quality={55}
+      widths={[640, 960, 1280, 1600]}
+      sizes="100vw"
+      class="absolute inset-0 h-full w-full object-cover saturate-[1.15]"
+    />
+    {
+      /* Spotlight scrim: a neutral (not green) darkening concentrated behind the
+         centred text, fading to near-clear at the edges — so the text stays
+         legible while the photo keeps its real colour. A flat green tint muted
+         everything and read as washed-out. */
+    }
+    <div
+      class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.6)_0%,rgba(0,0,0,0.15)_65%)]"
+    >
+    </div>
+    <div class="relative max-w-2xl">
+      <h1 class="font-display text-4xl sm:text-5xl mb-4 [text-shadow:0_1px_12px_rgba(0,0,0,0.5)]">
+        Gardens that feel alive
       </h1>
-      <p class="text-lg text-white/80 mb-8">
-        One or two sentences here about the service on offer, in a warm and confident voice.
+      <p class="text-lg text-white mb-8 [text-shadow:0_1px_10px_rgba(0,0,0,0.55)]">
+        Thoughtful garden design, planting and care — from wildlife ponds and wisteria-clad pergolas
+        to borders layered for colour through every season.
       </p>
       <a
         href="/contact/"
@@ -25,16 +58,23 @@ import Testimonials from '../components/Testimonials.astro';
 
   <section class="max-w-5xl mx-auto px-6 py-16 grid sm:grid-cols-3 gap-8 text-center">
     <div data-reveal>
-      <h2 class="font-display text-xl mb-2">Placeholder service one</h2>
-      <p class="text-forest/80 text-sm">Short description of what's on offer.</p>
+      <h2 class="font-display text-xl mb-2">Garden design</h2>
+      <p class="text-forest/80 text-sm">
+        A layout that suits how you want to use the space — structure, paths and planting that work
+        together.
+      </p>
     </div>
     <div data-reveal>
-      <h2 class="font-display text-xl mb-2">Placeholder service two</h2>
-      <p class="text-forest/80 text-sm">Short description of what's on offer.</p>
+      <h2 class="font-display text-xl mb-2">Planting &amp; borders</h2>
+      <p class="text-forest/80 text-sm">
+        Borders built for year-round interest, chosen to thrive in your soil and light.
+      </p>
     </div>
     <div data-reveal>
-      <h2 class="font-display text-xl mb-2">Placeholder service three</h2>
-      <p class="text-forest/80 text-sm">Short description of what's on offer.</p>
+      <h2 class="font-display text-xl mb-2">Ongoing care</h2>
+      <p class="text-forest/80 text-sm">
+        Regular maintenance to keep a garden looking its best, season after season.
+      </p>
     </div>
   </section>
 
@@ -43,9 +83,22 @@ import Testimonials from '../components/Testimonials.astro';
 
   <!-- The hero is deliberately not revealed: it is above the fold and the LCP
        element, so fading it in would delay the largest paint to win nothing. -->
-  <section class="bg-earth-light/20 py-16 text-center px-6" data-reveal>
-    <h2 class="font-display text-2xl mb-4">See the work</h2>
-    <p class="text-forest/80 mb-6">A preview of recent projects — full portfolio linked below.</p>
-    <a href="/portfolio/" class="underline hover:text-forest-light">View the portfolio &rarr;</a>
+  <section class="bg-earth-light/20 py-16 text-center px-6">
+    <div class="max-w-2xl mx-auto" data-reveal>
+      <img
+        src="/projects/nicks-garden/pond.jpeg"
+        alt="A wildlife pond edged with grasses and irises, a wisteria-draped pergola behind it and a weeping red acer on a pebble bank"
+        width="900"
+        height="1200"
+        loading="lazy"
+        class="w-full rounded-lg mb-8 aspect-[3/2] object-cover"
+      />
+      <h2 class="font-display text-2xl mb-4">See the work</h2>
+      <p class="text-forest/80 mb-6">
+        A look at recent projects, including Nick's Garden — a wildlife garden built around a
+        natural pond.
+      </p>
+      <a href="/portfolio/" class="underline hover:text-forest-light">View the portfolio &rarr;</a>
+    </div>
   </section>
 </BaseLayout>

@@ -146,4 +146,20 @@ test.describe('project gallery lightbox', () => {
     await page.goto('/about/');
     await expect(page.locator('#project-gallery')).toHaveCount(0);
   });
+
+  test('opens the lightbox for same-origin images without navigating away', async ({ page }) => {
+    // Regression guard. Real project photos are served from our own origin, and
+    // Astro's ClientRouter intercepts same-origin link clicks for view
+    // transitions — so without a capture-phase preventDefault it would navigate
+    // straight to the .jpeg instead of opening the overlay. The placeholder
+    // projects use cross-origin images, which the router ignores, so this must
+    // be checked against a project with local images.
+    await page.goto('/portfolio/nicks-garden/');
+    const href = await page.locator('#project-gallery a').first().getAttribute('href');
+    expect(href).toMatch(/^\/projects\/.+\.jpe?g$/); // same-origin, relative
+
+    await page.locator('#project-gallery a').first().click();
+    await expect(page.locator('#lightbox')).toBeVisible();
+    await expect(page).toHaveURL(/\/portfolio\/nicks-garden\/$/);
+  });
 });

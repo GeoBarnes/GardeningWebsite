@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Original unoptimised source photos (web versions live in public/)
+/NicksGardenPhotos/

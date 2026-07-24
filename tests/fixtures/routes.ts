@@ -17,10 +17,12 @@ export interface RouteFixture {
 export const routes: RouteFixture[] = [
   { path: '/', title: 'Home' },
   { path: '/portfolio/', title: 'Portfolio' },
-  // Two project pages, deliberately: one with a before/after slider and one
-  // without, so the a11y sweep covers both branches of the detail template.
+  // Two placeholder project pages, deliberately: one with a before/after slider
+  // and one without, so the a11y sweep covers both branches of the detail
+  // template. Plus one real project (Nick's Garden) with real photos.
   { path: '/portfolio/oak-lane-border/', title: 'Oak Lane Border' },
   { path: '/portfolio/willow-cottage-patio/', title: 'Willow Cottage Patio' },
+  { path: '/portfolio/nicks-garden/', title: "Nick's Garden" },
   { path: '/about/', title: 'About' },
   { path: '/contact/', title: 'Contact' },
   // Not linked from the nav — reached only via Formspree's post-submit redirect.
