@@ -8,11 +8,10 @@ import Testimonials from '../components/Testimonials.astro';
     class="relative flex items-center justify-center min-h-[70vh] bg-forest text-white text-center px-6"
   >
     <div class="max-w-2xl">
-      <h1 class="font-display text-4xl sm:text-5xl mb-4">
-        Placeholder hero headline about beautiful gardens
-      </h1>
+      <h1 class="font-display text-4xl sm:text-5xl mb-4">Gardens that feel alive</h1>
       <p class="text-lg text-white/80 mb-8">
-        One or two sentences here about the service on offer, in a warm and confident voice.
+        Thoughtful garden design, planting and care — from wildlife ponds and wisteria-clad pergolas
+        to borders layered for colour through every season.
       </p>
       <a
         href="/contact/"
@@ -25,16 +24,23 @@ import Testimonials from '../components/Testimonials.astro';
 
   <section class="max-w-5xl mx-auto px-6 py-16 grid sm:grid-cols-3 gap-8 text-center">
     <div data-reveal>
-      <h2 class="font-display text-xl mb-2">Placeholder service one</h2>
-      <p class="text-forest/80 text-sm">Short description of what's on offer.</p>
+      <h2 class="font-display text-xl mb-2">Garden design</h2>
+      <p class="text-forest/80 text-sm">
+        A layout that suits how you want to use the space — structure, paths and planting that work
+        together.
+      </p>
     </div>
     <div data-reveal>
-      <h2 class="font-display text-xl mb-2">Placeholder service two</h2>
-      <p class="text-forest/80 text-sm">Short description of what's on offer.</p>
+      <h2 class="font-display text-xl mb-2">Planting &amp; borders</h2>
+      <p class="text-forest/80 text-sm">
+        Borders built for year-round interest, chosen to thrive in your soil and light.
+      </p>
     </div>
     <div data-reveal>
-      <h2 class="font-display text-xl mb-2">Placeholder service three</h2>
-      <p class="text-forest/80 text-sm">Short description of what's on offer.</p>
+      <h2 class="font-display text-xl mb-2">Ongoing care</h2>
+      <p class="text-forest/80 text-sm">
+        Regular maintenance to keep a garden looking its best, season after season.
+      </p>
     </div>
   </section>
 
@@ -43,9 +49,22 @@ import Testimonials from '../components/Testimonials.astro';
 
   <!-- The hero is deliberately not revealed: it is above the fold and the LCP
        element, so fading it in would delay the largest paint to win nothing. -->
-  <section class="bg-earth-light/20 py-16 text-center px-6" data-reveal>
-    <h2 class="font-display text-2xl mb-4">See the work</h2>
-    <p class="text-forest/80 mb-6">A preview of recent projects — full portfolio linked below.</p>
-    <a href="/portfolio/" class="underline hover:text-forest-light">View the portfolio &rarr;</a>
+  <section class="bg-earth-light/20 py-16 text-center px-6">
+    <div class="max-w-2xl mx-auto" data-reveal>
+      <img
+        src="/projects/nicks-garden/pond.jpeg"
+        alt="A wildlife pond edged with grasses and irises, a wisteria-draped pergola behind it and a weeping red acer on a pebble bank"
+        width="900"
+        height="1200"
+        loading="lazy"
+        class="w-full rounded-lg mb-8 aspect-[3/2] object-cover"
+      />
+      <h2 class="font-display text-2xl mb-4">See the work</h2>
+      <p class="text-forest/80 mb-6">
+        A look at recent projects, including Nick's Garden — a wildlife garden built around a
+        natural pond.
+      </p>
+      <a href="/portfolio/" class="underline hover:text-forest-light">View the portfolio &rarr;</a>
+    </div>
   </section>
 </BaseLayout>
