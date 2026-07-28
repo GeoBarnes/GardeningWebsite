@@ -11,7 +11,9 @@
 // is delegated to `document`, which persists across a client-side navigation,
 // and the overlay is built fresh on each open — so there is no lifecycle to get
 // out of sync with the page.
+import { Image, getImage } from 'astro:assets';
 import type { ProjectImage } from '../content/schema';
+import { resolveLocalImage } from '../lib/localImages';
 
 interface Props {
   images: ProjectImage[];
@@ -20,23 +22,55 @@ interface Props {
 }
 
 const { images, title } = Astro.props;
+
+// Local photos get optimised sources: a responsive thumbnail via <Image>, and a
+// larger WebP for the lightbox (the `href`, which the overlay script loads).
+// Remote placeholder images can't be optimised, so they pass through untouched.
+const items = await Promise.all(
+  images.map(async (image) => {
+    const alt = image.alt ?? title;
+    const asset = resolveLocalImage(image.src);
+    if (!asset) {
+      return {
+        kind: 'remote' as const,
+        src: image.src,
+        width: image.width,
+        height: image.height,
+        alt,
+      };
+    }
+    const full = await getImage({ src: asset, width: 1400, format: 'webp' });
+    return { kind: 'local' as const, asset, full: full.src, alt };
+  })
+);
 ---
 
 <div class="grid sm:grid-cols-2 gap-4 mb-8" id="project-gallery">
   {
-    images.map((image) => (
+    items.map((item) => (
       <a
-        href={image.src}
+        href={item.kind === 'local' ? item.full : item.src}
         class="block rounded-lg overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
       >
-        <img
-          src={image.src}
-          alt={image.alt ?? title}
-          width={image.width}
-          height={image.height}
-          loading="lazy"
-          class="w-full aspect-[3/2] object-cover"
-        />
+        {item.kind === 'local' ? (
+          <Image
+            src={item.asset}
+            alt={item.alt}
+            widths={[400, 640, 900]}
+            sizes="(min-width: 640px) 45vw, 92vw"
+            loading="lazy"
+            class="w-full aspect-[3/2] object-cover"
+          />
+        ) : (
+          <img
+            src={item.src}
+            alt={item.alt}
+            width={item.width}
+            height={item.height}
+            loading="lazy"
+            class="w-full aspect-[3/2] object-cover"
+          />
+        )}
       </a>
     ))
   }
