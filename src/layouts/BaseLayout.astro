@@ -1,5 +1,10 @@
 ---
 import '../styles/global.css';
+// Self-hosted fonts (Vite bundles the woff2 from our own origin), replacing the
+// render-blocking Google Fonts stylesheet. Fraunces via its optical-size axis
+// so headings keep size-appropriate letterforms; Inter for body.
+import '@fontsource-variable/fraunces/opsz.css';
+import '@fontsource-variable/inter';
 import { ClientRouter } from 'astro:transitions';
 import { SITE_INDEXABLE, BUSINESS, DEFAULT_OG_IMAGE } from '../config';
 
@@ -86,12 +91,6 @@ const navLinks = [
     <script is:inline>
       document.documentElement.classList.add('js');
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
     {/* Per-page <head> extras — e.g. a page's structured-data block. */}
     <slot name="head" />
   </head>
