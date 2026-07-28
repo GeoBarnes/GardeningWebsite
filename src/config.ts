@@ -23,18 +23,18 @@ export const SITE_INDEXABLE = false;
  * `LocalBusiness` JSON-LD, so a single edit here keeps them in step — search
  * engines penalise name/address/phone that disagree between the two.
  *
- * **Everything here is a placeholder** (Phase 7): the name, the fake phone and
- * email, and the bracketed service area all get swapped for the real thing
- * before launch. `telephone` is E.164 for the schema; `telephoneDisplay` is the
- * human-readable form shown on the page.
+ * The name and service area are real; **the phone and email are still
+ * placeholders** (Phase 7) and must be swapped for hers before launch.
+ * `telephone` is E.164 for the schema; `telephoneDisplay` is the human-readable
+ * form shown on the page.
  */
 export const BUSINESS = {
-  name: 'Placeholder Gardening Co.',
+  name: 'Sandy Cleary Garden Design',
   description: 'Friendly, experienced garden design and maintenance.',
   email: 'hello@example.com',
   telephone: '+447000000000',
   telephoneDisplay: '07000 000000',
-  areaServed: '[service area]',
+  areaServed: 'Northampton and surrounding areas',
 } as const;
 
 /**
