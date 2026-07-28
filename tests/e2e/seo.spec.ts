@@ -42,8 +42,10 @@ test.describe('LocalBusiness structured data', () => {
 
       const data = JSON.parse(raw!);
       expect(data['@type']).toBe('LocalBusiness');
-      // The fields that make the block useful for local search.
-      for (const key of ['name', 'telephone', 'email', 'areaServed', 'url']) {
+      // The fields that make the block useful for local search. Telephone is
+      // deliberately excluded — it's optional and omitted while there's no
+      // number, rather than emitted empty.
+      for (const key of ['name', 'email', 'areaServed', 'url']) {
         expect(data[key], `missing "${key}"`).toBeTruthy();
       }
       expect(data.url).toMatch(/^https?:\/\//);

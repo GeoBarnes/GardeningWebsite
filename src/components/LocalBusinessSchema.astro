@@ -16,7 +16,9 @@ const schema = {
   name: BUSINESS.name,
   description: BUSINESS.description,
   email: BUSINESS.email,
-  telephone: BUSINESS.telephone,
+  // Only include a phone when there is one — an empty telephone is worse than
+  // omitting the field.
+  ...(BUSINESS.telephone ? { telephone: BUSINESS.telephone } : {}),
   areaServed: BUSINESS.areaServed,
   url: new URL('/', Astro.site).href,
 };

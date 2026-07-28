@@ -111,9 +111,11 @@ test.describe('contact form', () => {
     await expect(honeypot).toHaveAttribute('tabindex', '-1');
   });
 
-  test('shows a plain-text phone and email fallback', async ({ page }) => {
-    await expect(page.locator('a[href^="tel:"]')).toBeVisible();
+  test('shows a plain-text email fallback, without a dangling phone link', async ({ page }) => {
     await expect(page.locator('a[href^="mailto:"]')).toBeVisible();
+    // The phone is optional (none configured yet); when absent we must not
+    // render an empty `tel:` link. A real number would be `tel:+44…`, not this.
+    await expect(page.locator('a[href="tel:"]')).toHaveCount(0);
   });
 });
 

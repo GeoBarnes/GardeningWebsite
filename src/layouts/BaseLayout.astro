@@ -22,6 +22,14 @@ const {
 } = Astro.props;
 
 const pageTitle = `${title} | ${BUSINESS.name}`;
+// Footer contact line, dropping any blank part (there may be no phone yet).
+const footerContact = [
+  BUSINESS.areaServed && `Serving ${BUSINESS.areaServed}`,
+  BUSINESS.email,
+  BUSINESS.telephoneDisplay,
+]
+  .filter(Boolean)
+  .join(' · ');
 // The page's own canonical URL, and absolute share image, both built from
 // `site` so they're the production origin even when previewed on localhost.
 // Fall back to the request origin when `site` is unset (e.g. the Container API
@@ -163,11 +171,7 @@ const navLinks = [
         class="max-w-5xl mx-auto px-6 py-8 text-sm text-forest/80 flex flex-col sm:flex-row justify-between gap-2"
       >
         <p>&copy; {new Date().getFullYear()} {BUSINESS.name}</p>
-        <p>
-          Serving {BUSINESS.areaServed} &middot; {BUSINESS.email} &middot; {
-            BUSINESS.telephoneDisplay
-          }
-        </p>
+        <p>{footerContact}</p>
       </div>
     </footer>
 
