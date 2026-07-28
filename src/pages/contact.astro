@@ -90,12 +90,17 @@ const thanksUrl = new URL('/contact/thanks/', Astro.site).href;
     </form>
 
     <div class="mt-10 pt-8 border-t border-earth-light/40 text-forest/80 text-sm">
-      <p>Prefer to call or email directly?</p>
-      <p class="mt-1">
-        Phone: <a href={`tel:${BUSINESS.telephone}`} class="underline"
-          >{BUSINESS.telephoneDisplay}</a
-        >
-      </p>
+      <p>Prefer to {BUSINESS.telephoneDisplay ? 'call or email' : 'email'} directly?</p>
+      {
+        BUSINESS.telephoneDisplay && (
+          <p class="mt-1">
+            Phone:{' '}
+            <a href={`tel:${BUSINESS.telephone}`} class="underline">
+              {BUSINESS.telephoneDisplay}
+            </a>
+          </p>
+        )
+      }
       <p>Email: <a href={`mailto:${BUSINESS.email}`} class="underline">{BUSINESS.email}</a></p>
     </div>
   </section>
