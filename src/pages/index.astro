@@ -1,8 +1,9 @@
 ---
-import { Picture } from 'astro:assets';
+import { Image, Picture } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Testimonials from '../components/Testimonials.astro';
-import heroImage from '../assets/hero-pond.jpeg';
+// The pond photo does double duty: the hero backdrop and the portfolio teaser.
+import pondImage from '../assets/projects/nicks-garden/pond.jpeg';
 ---
 
 <BaseLayout title="Home">
@@ -18,7 +19,7 @@ import heroImage from '../assets/hero-pond.jpeg';
          lift makes the garden's colour pop. */
     }
     <Picture
-      src={heroImage}
+      src={pondImage}
       formats={['avif', 'webp']}
       alt=""
       aria-hidden="true"
@@ -85,11 +86,11 @@ import heroImage from '../assets/hero-pond.jpeg';
        element, so fading it in would delay the largest paint to win nothing. -->
   <section class="bg-earth-light/20 py-16 text-center px-6">
     <div class="max-w-2xl mx-auto" data-reveal>
-      <img
-        src="/projects/nicks-garden/pond.jpeg"
+      <Image
+        src={pondImage}
         alt="A wildlife pond edged with grasses and irises, a wisteria-draped pergola behind it and a weeping red acer on a pebble bank"
-        width="900"
-        height="1200"
+        widths={[600, 900]}
+        sizes="(min-width: 640px) 42rem, 92vw"
         loading="lazy"
         class="w-full rounded-lg mb-8 aspect-[3/2] object-cover"
       />

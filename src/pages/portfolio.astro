@@ -1,6 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { resolveLocalImage } from '../lib/localImages';
 
 const projects = (await getCollection('projects')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
@@ -14,22 +16,40 @@ const projects = (await getCollection('projects')).sort(
 
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {
-        projects.map((project) => (
-          <article class="group" data-reveal>
-            <a href={`/portfolio/${project.id}/`}>
-              <img
-                src={project.data.images[0].src}
-                alt={project.data.images[0].alt ?? project.data.title}
-                width={project.data.images[0].width}
-                height={project.data.images[0].height}
-                loading="lazy"
-                class="w-full aspect-[3/2] object-cover rounded-lg mb-3 transition-opacity group-hover:opacity-90"
-              />
-              <h2 class="font-display text-lg">{project.data.title}</h2>
-              <p class="text-forest/80 text-sm">{project.data.summary}</p>
-            </a>
-          </article>
-        ))
+        projects.map((project) => {
+          const cover = project.data.images[0];
+          const asset = resolveLocalImage(cover.src);
+          const alt = cover.alt ?? project.data.title;
+          const cardClass =
+            'w-full aspect-[3/2] object-cover rounded-lg mb-3 transition-opacity group-hover:opacity-90';
+          return (
+            <article class="group" data-reveal>
+              <a href={`/portfolio/${project.id}/`}>
+                {asset ? (
+                  <Image
+                    src={asset}
+                    alt={alt}
+                    widths={[400, 640]}
+                    sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 92vw"
+                    loading="lazy"
+                    class={cardClass}
+                  />
+                ) : (
+                  <img
+                    src={cover.src}
+                    alt={alt}
+                    width={cover.width}
+                    height={cover.height}
+                    loading="lazy"
+                    class={cardClass}
+                  />
+                )}
+                <h2 class="font-display text-lg">{project.data.title}</h2>
+                <p class="text-forest/80 text-sm">{project.data.summary}</p>
+              </a>
+            </article>
+          );
+        })
       }
     </div>
   </section>

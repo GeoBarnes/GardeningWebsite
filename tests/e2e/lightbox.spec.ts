@@ -156,7 +156,10 @@ test.describe('project gallery lightbox', () => {
     // be checked against a project with local images.
     await page.goto('/portfolio/nicks-garden/');
     const href = await page.locator('#project-gallery a').first().getAttribute('href');
-    expect(href).toMatch(/^\/projects\/.+\.jpe?g$/); // same-origin, relative
+    // Same-origin (relative), and an optimised source now the photos run through
+    // the image pipeline — this is exactly what ClientRouter tries to hijack.
+    expect(href).toMatch(/^\/.+\.(webp|avif|jpe?g)$/);
+    expect(href).not.toMatch(/^https?:\/\//);
 
     await page.locator('#project-gallery a').first().click();
     await expect(page.locator('#lightbox')).toBeVisible();

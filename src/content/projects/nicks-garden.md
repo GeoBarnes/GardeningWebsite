@@ -2,33 +2,33 @@
 title: "Nick's Garden"
 summary: 'An established wildlife garden built around a natural pond, with a wisteria-clad pergola and richly planted cottage borders.'
 images:
-  - src: '/projects/nicks-garden/pond.jpeg'
-    width: 900
-    height: 1200
-    alt: 'A wildlife pond edged with grasses and irises, a wisteria-draped pergola behind it and a weeping red acer on a pebble bank'
-  - src: '/projects/nicks-garden/pergola-path.jpeg'
-    width: 900
-    height: 1200
-    alt: 'A block-paved path running beneath a pergola hung with purple wisteria'
-  - src: '/projects/nicks-garden/clematis.jpeg'
-    width: 900
-    height: 1200
-    alt: 'Magenta clematis climbing a green pergola post above a border of dark-leaved shrubs'
-  - src: '/projects/nicks-garden/foxglove.jpeg'
-    width: 900
-    height: 1200
-    alt: 'A pink foxglove rising above spikes of purple salvia and the silvery foliage of a cardoon'
-  - src: '/projects/nicks-garden/roses.jpeg'
-    width: 900
-    height: 1200
-    alt: 'Two apricot roses in full bloom with coral buds opening below them'
-  - src: '/projects/nicks-garden/summer-border.jpeg'
-    width: 900
-    height: 1200
-    alt: 'Steely-blue sea holly and scarlet climbing roses packed into a summer border'
-  - src: '/projects/nicks-garden/dragonfly.jpeg'
+  - src: '/src/assets/projects/nicks-garden/pond.jpeg'
     width: 1200
-    height: 900
+    height: 1600
+    alt: 'A wildlife pond edged with grasses and irises, a wisteria-draped pergola behind it and a weeping red acer on a pebble bank'
+  - src: '/src/assets/projects/nicks-garden/pergola-path.jpeg'
+    width: 1200
+    height: 1600
+    alt: 'A block-paved path running beneath a pergola hung with purple wisteria'
+  - src: '/src/assets/projects/nicks-garden/clematis.jpeg'
+    width: 1200
+    height: 1600
+    alt: 'Magenta clematis climbing a green pergola post above a border of dark-leaved shrubs'
+  - src: '/src/assets/projects/nicks-garden/foxglove.jpeg'
+    width: 1200
+    height: 1600
+    alt: 'A pink foxglove rising above spikes of purple salvia and the silvery foliage of a cardoon'
+  - src: '/src/assets/projects/nicks-garden/roses.jpeg'
+    width: 1200
+    height: 1600
+    alt: 'Two apricot roses in full bloom with coral buds opening below them'
+  - src: '/src/assets/projects/nicks-garden/summer-border.jpeg'
+    width: 1200
+    height: 1600
+    alt: 'Steely-blue sea holly and scarlet climbing roses packed into a summer border'
+  - src: '/src/assets/projects/nicks-garden/dragonfly.jpeg'
+    width: 1600
+    height: 1200
     alt: 'A dragonfly with amber-veined wings resting on a metal globe beside the pond'
 date: 2026-06-21
 ---
