@@ -7,11 +7,10 @@
   --color-earth: #8a7a63;
   --color-earth-light: #b5a58c;
 
-  /* Warm stone page background — a soft greige drawn from the earth tones,
-     softer and less clinical than pure white and a touch cosier/earthier than
-     cream. Swap this one value to retone the whole site (e.g. cream #f7f4ee,
-     sage #eaefe6). */
-  --color-paper: #efe9df;
+  /* Warm off-white page background — softer and less clinical than pure white,
+     and a neutral canvas that lets the greenery in the photos lead. Swap this
+     one value to retone the whole site (e.g. sage #eaefe6, stone #efe9df). */
+  --color-paper: #f7f4ee;
 
   --font-display: 'Fraunces Variable', serif;
   --font-body: 'Inter Variable', sans-serif;
