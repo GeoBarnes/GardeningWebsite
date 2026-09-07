@@ -9,8 +9,11 @@ test.describe('project gallery lightbox', () => {
   test('thumbnails link to the full image, so the gallery works without JS', async ({ page }) => {
     // Progressive enhancement: the markup is plain anchors. If the script fails
     // to load, clicking a thumbnail still opens the image rather than nothing.
+    // The href is an image URL — a build-optimised local path for photos in
+    // src/assets, or an absolute URL for a remote one — so it just has to be
+    // non-empty and end in an image extension.
     const first = page.locator('#project-gallery a').first();
-    await expect(first).toHaveAttribute('href', /^https?:\/\//);
+    await expect(first).toHaveAttribute('href', /\.(webp|avif|jpe?g|png)$/i);
   });
 
   test('opens a centred overlay when a thumbnail is clicked', async ({ page }) => {

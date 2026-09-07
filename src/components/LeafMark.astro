@@ -1,0 +1,24 @@
+---
+// The site's mark: a single leaf with a midrib, drawn as one stroke so it
+// stays crisp at favicon size and takes its colour from the surrounding text.
+// The same shape is rendered into public/favicon.svg (in `forest`).
+interface Props {
+  class?: string;
+}
+
+const { class: className = 'w-6 h-6' } = Astro.props;
+---
+
+<svg
+  class={className}
+  viewBox="0 0 32 32"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path d="M26 6C14 6 6 13 6 24c0 .8.1 1.5.2 2.2C17 27 26 20 26 6Z"></path>
+  <path d="M6.5 26C11 18 16 13 22 10"></path>
+</svg>

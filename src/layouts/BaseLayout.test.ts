@@ -34,4 +34,11 @@ describe('BaseLayout', () => {
   it('renders a footer', () => {
     expect(html).toContain('<footer');
   });
+
+  it('marks the current page in the nav for assistive tech', () => {
+    // Under the Container API the request path is "/", so Home is current and
+    // nothing else is.
+    expect(html).toMatch(/<a[^>]*href="\/"[^>]*aria-current="page"/);
+    expect(html).not.toMatch(/<a[^>]*href="\/portfolio\/"[^>]*aria-current="page"/);
+  });
 });

@@ -2,11 +2,12 @@
 title: 'Willow Cottage Patio Planting'
 summary: 'Container and border planting designed to soften a new patio and provide colour through three seasons.'
 images:
-  - src: 'https://placehold.co/1200x800/4a6a58/ffffff?text=Willow+Cottage+Patio'
+  - src: '/src/assets/projects/willow-cottage-patio/patio.jpeg'
     width: 1200
     height: 800
-    alt: 'Container planting softening the edge of the new patio'
+    alt: 'Placeholder for the container planting softening the edge of the new patio'
 date: 2026-05-30
 ---
 
-Placeholder project notes — replace with real details once the project is written up.
+Full write-up coming soon — the brief, the containers and plants chosen, and
+how the planting carries colour from spring into autumn.

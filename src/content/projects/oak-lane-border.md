@@ -2,18 +2,19 @@
 title: 'Oak Lane Border Renovation'
 summary: 'A tired, overgrown border brought back to life with structured planting and a new dry-stone edge.'
 images:
-  - src: 'https://placehold.co/1200x800/2f4a3d/ffffff?text=Oak+Lane+Border'
+  - src: '/src/assets/projects/oak-lane-border/finished-border.jpeg'
     width: 1200
     height: 800
-    alt: 'The finished border, densely planted with structural evergreens'
-  - src: 'https://placehold.co/1200x800/4a6a58/ffffff?text=Dry+Stone+Edge'
+    alt: 'Placeholder for the finished border, densely planted with structural evergreens'
+  - src: '/src/assets/projects/oak-lane-border/dry-stone-edge.jpeg'
     width: 1200
     height: 800
-    alt: 'Close-up of the new dry-stone edging along the path'
+    alt: 'Placeholder for a close-up of the new dry-stone edging along the path'
 beforeAfter:
-  before: 'https://placehold.co/800x600/8a7a63/ffffff?text=Before'
-  after: 'https://placehold.co/800x600/2f4a3d/ffffff?text=After'
+  before: '/placeholders/oak-lane-before.jpg'
+  after: '/placeholders/oak-lane-after.jpg'
 date: 2026-04-12
 ---
 
-Placeholder project notes — replace with real details once the project is written up: what was there before, what changed, plants used, and any client feedback.
+Full write-up coming soon — what was there before, what changed, the plants
+used, and how the border has settled in since.

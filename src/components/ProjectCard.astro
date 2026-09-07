@@ -1,0 +1,72 @@
+---
+// A portfolio card. The cover image sits inside a wrapper carrying a
+// `transition:name` unique to the project; the detail page wraps its own cover
+// in the same name, so with view transitions on the photo morphs from card to
+// page rather than cutting. (The directive goes on a plain element rather than
+// the <Image> component, where Astro does not reliably apply it.)
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { resolveLocalImage } from '../lib/localImages';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  /** The lead card: spans two columns and takes a wider crop. */
+  featured?: boolean;
+}
+
+const { project, featured = false } = Astro.props;
+const cover = project.data.images[0];
+const asset = resolveLocalImage(cover.src);
+const alt = cover.alt ?? project.data.title;
+const year = project.data.date.getFullYear();
+const imageClass = [
+  'w-full object-cover transition-transform duration-700 group-hover:scale-105',
+  featured ? 'aspect-[16/9] sm:aspect-[2/1]' : 'aspect-[4/3]',
+].join(' ');
+---
+
+<article class:list={['group', featured && 'sm:col-span-2']} data-reveal>
+  <a href={`/portfolio/${project.id}/`} class="block">
+    <div
+      class="overflow-hidden rounded-2xl mb-4 shadow-lg shadow-forest/5"
+      transition:name={`project-${project.id}`}
+    >
+      {
+        asset ? (
+          <Image
+            src={asset}
+            alt={alt}
+            widths={featured ? [800, 1200, 1600] : [400, 640, 900]}
+            sizes={
+              featured
+                ? '(min-width: 1152px) 72rem, 92vw'
+                : '(min-width: 1152px) 36rem, (min-width: 640px) 45vw, 92vw'
+            }
+            loading="lazy"
+            class={imageClass}
+          />
+        ) : (
+          <img
+            src={cover.src}
+            alt={alt}
+            width={cover.width}
+            height={cover.height}
+            loading="lazy"
+            class={imageClass}
+          />
+        )
+      }
+    </div>
+    <div class="flex items-baseline justify-between gap-4 mb-1">
+      <h2 class:list={['font-display text-balance', featured ? 'text-2xl sm:text-3xl' : 'text-xl']}>
+        {project.data.title}
+      </h2>
+      <span
+        class="shrink-0 text-xs uppercase tracking-widest text-forest/80 border border-earth-light/50 rounded-full px-2.5 py-1"
+      >
+        {year}
+      </span>
+    </div>
+    <p class="text-forest/80 text-pretty line-clamp-2">{project.data.summary}</p>
+  </a>
+</article>

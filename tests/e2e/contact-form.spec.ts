@@ -112,7 +112,9 @@ test.describe('contact form', () => {
   });
 
   test('shows a plain-text email fallback, without a dangling phone link', async ({ page }) => {
-    await expect(page.locator('a[href^="mailto:"]')).toBeVisible();
+    // Scoped to <main>: the footer carries the same address on every page, and
+    // the contract here is that the contact page itself offers it.
+    await expect(page.locator('main a[href^="mailto:"]')).toBeVisible();
     // The phone is optional (none configured yet); when absent we must not
     // render an empty `tel:` link. A real number would be `tel:+44…`, not this.
     await expect(page.locator('a[href="tel:"]')).toHaveCount(0);

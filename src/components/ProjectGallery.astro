@@ -45,21 +45,21 @@ const items = await Promise.all(
 );
 ---
 
-<div class="grid sm:grid-cols-2 gap-4 mb-8" id="project-gallery">
+<div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-12" id="project-gallery">
   {
     items.map((item) => (
       <a
         href={item.kind === 'local' ? item.full : item.src}
-        class="block rounded-lg overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
+        class="group block rounded-xl overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
       >
         {item.kind === 'local' ? (
           <Image
             src={item.asset}
             alt={item.alt}
             widths={[400, 640, 900]}
-            sizes="(min-width: 640px) 45vw, 92vw"
+            sizes="(min-width: 1024px) 30vw, 45vw"
             loading="lazy"
-            class="w-full aspect-[3/2] object-cover"
+            class="w-full aspect-[4/5] object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
           <img
@@ -68,7 +68,7 @@ const items = await Promise.all(
             width={item.width}
             height={item.height}
             loading="lazy"
-            class="w-full aspect-[3/2] object-cover"
+            class="w-full aspect-[4/5] object-cover transition-transform duration-700 group-hover:scale-105"
           />
         )}
       </a>

@@ -1,0 +1,45 @@
+---
+// Closing call-to-action: a full-width forest band that ends a page on the
+// thing we actually want a visitor to do. Contact details come from BUSINESS,
+// so the email here can never disagree with the footer or the JSON-LD.
+import { BUSINESS } from '../config';
+
+interface Props {
+  heading?: string;
+  body?: string;
+}
+
+const {
+  heading = 'Ready to talk about your garden?',
+  body = 'Tell me a little about the space and what you would like from it, and I will come back to you within a couple of working days.',
+} = Astro.props;
+---
+
+<section class="bg-forest text-white" aria-labelledby="cta-heading">
+  <div
+    class="max-w-6xl mx-auto px-6 py-16 sm:py-20 flex flex-col md:flex-row md:items-center gap-8 md:gap-16"
+  >
+    <div class="flex-1">
+      <h2 id="cta-heading" class="font-display text-3xl sm:text-4xl text-balance mb-3">
+        {heading}
+      </h2>
+      <p class="text-white/85 text-pretty max-w-xl">{body}</p>
+    </div>
+    <div
+      class="flex flex-col sm:flex-row md:flex-col gap-3 sm:items-center md:items-start shrink-0"
+    >
+      <a
+        href="/contact/"
+        class="inline-block bg-white text-forest px-7 py-3 rounded-full font-medium hover:bg-moss transition-colors text-center"
+      >
+        Get in touch
+      </a>
+      <a
+        href={`mailto:${BUSINESS.email}`}
+        class="text-sm text-white/85 underline underline-offset-4 hover:text-white"
+      >
+        {BUSINESS.email}
+      </a>
+    </div>
+  </div>
+</section>
