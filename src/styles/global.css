@@ -12,8 +12,59 @@
      one value to retone the whole site (e.g. sage #eaefe6, stone #efe9df). */
   --color-paper: #f7f4ee;
 
+  /* Pale sage tint for eyebrow chips and quiet section backgrounds. Body text
+     on it stays `forest`, which keeps contrast comfortably above AA. */
+  --color-moss: #e3ebdd;
+
+  /* Warm accent lifted from the acer and roses in the photos — for small
+     details only (hover underlines, the featured-card chip), never body text. */
+  --color-clay: #a8654a;
+
   --font-display: 'Fraunces Variable', serif;
   --font-body: 'Inter Variable', sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+   Fraunces italic — lowercase only
+
+   The home-page hero sets one word in italic. The full italic face from
+   fontsource is ~80KB, and Lighthouse showed it delaying first paint by about
+   0.6s on a throttled phone; this subset (a–z, both axes kept) is ~20KB.
+   The `unicode-range` means only lowercase letters use it — an italic capital
+   or digit would get a synthesised slant — so keep italic accents lowercase.
+   Regenerate with fontTools if the source font is updated:
+     pyftsubset fraunces-latin-opsz-italic.woff2 --unicodes=U+0061-007A \
+       --flavor=woff2 --layout-features='*' --output-file=<this file>
+   --------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Fraunces Variable';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../assets/fonts/fraunces-italic-lowercase.woff2') format('woff2');
+  unicode-range: U+0061-007A;
+}
+
+/* ---------------------------------------------------------------------------
+   Hero photo drift
+
+   A very slow scale on the full-bleed hero image so the page feels alive
+   before anything is scrolled. Transform-only, so it never triggers layout,
+   and it stops at its end state rather than looping (a looping zoom reads as
+   a screensaver). Disabled entirely under reduced motion, below.
+   --------------------------------------------------------------------------- */
+@keyframes hero-drift {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+.hero-photo img {
+  animation: hero-drift 14s ease-out forwards;
+  transform-origin: 50% 60%;
 }
 
 /* ---------------------------------------------------------------------------
@@ -127,6 +178,26 @@ html.lightbox-open {
   transform: none;
 }
 
+/* Siblings inside a `data-reveal-stagger` parent settle one after another
+   rather than all at once. Pure CSS: the observer still reveals each child
+   individually, and the delay is what turns "all together" into a cascade.
+   Capped at six so a long list never leaves its tail waiting. */
+[data-reveal-stagger] > [data-reveal]:nth-child(2) {
+  transition-delay: 90ms;
+}
+[data-reveal-stagger] > [data-reveal]:nth-child(3) {
+  transition-delay: 180ms;
+}
+[data-reveal-stagger] > [data-reveal]:nth-child(4) {
+  transition-delay: 270ms;
+}
+[data-reveal-stagger] > [data-reveal]:nth-child(5) {
+  transition-delay: 360ms;
+}
+[data-reveal-stagger] > [data-reveal]:nth-child(6) {
+  transition-delay: 450ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Show everything outright rather than animating it more gently. */
   .js [data-reveal] {
@@ -136,6 +207,10 @@ html.lightbox-open {
 
   [data-reveal] {
     transition: none;
+  }
+
+  .hero-photo img {
+    animation: none;
   }
 
   /* Astro's view transitions animate via the ::view-transition pseudo-elements,

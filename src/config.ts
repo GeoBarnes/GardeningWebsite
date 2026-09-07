@@ -41,9 +41,8 @@ export const BUSINESS = {
 /**
  * Default social-share image (Open Graph / Twitter), 1200×630.
  *
- * A `placehold.co` box like the rest of the prototype, so previews are valid
- * now and there's an obvious thing to replace with a real photo in Phase 7. A
- * page can override it by passing an `image` to BaseLayout.
+ * A crop of the Nick's Garden pond photo, committed as a static file so link
+ * previews in messaging apps show the garden. Site-relative: BaseLayout
+ * resolves it against `site`. A page can override it by passing an `image`.
  */
-export const DEFAULT_OG_IMAGE =
-  'https://placehold.co/1200x630/2f4a3d/ffffff?text=Placeholder+Gardening+Co.';
+export const DEFAULT_OG_IMAGE = '/og.jpg';

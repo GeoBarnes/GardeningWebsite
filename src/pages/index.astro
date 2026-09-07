@@ -1,105 +1,275 @@
 ---
 import { Image, Picture } from 'astro:assets';
+import { getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Testimonials from '../components/Testimonials.astro';
-// The pond photo does double duty: the hero backdrop and the portfolio teaser.
+import ServiceCard from '../components/ServiceCard.astro';
+import CtaBand from '../components/CtaBand.astro';
+import IconLeaf from '../components/icons/IconLeaf.astro';
+import IconTrowel from '../components/icons/IconTrowel.astro';
+import IconWateringCan from '../components/icons/IconWateringCan.astro';
+import { BUSINESS } from '../config';
+import { resolveLocalImage } from '../lib/localImages';
+// The pond photo does double duty: the hero backdrop and the featured project.
 import pondImage from '../assets/projects/nicks-garden/pond.jpeg';
+import pergolaImage from '../assets/projects/nicks-garden/pergola-path.jpeg';
+import foxgloveImage from '../assets/projects/nicks-garden/foxglove.jpeg';
+import rosesImage from '../assets/projects/nicks-garden/roses.jpeg';
+import borderImage from '../assets/projects/nicks-garden/summer-border.jpeg';
+import dragonflyImage from '../assets/projects/nicks-garden/dragonfly.jpeg';
+
+// The featured project reads its title and summary from the collection, so a
+// content edit there flows through here without a second copy to keep in step.
+const featured = await getEntry('projects', 'nicks-garden');
+if (!featured) throw new Error('Featured project "nicks-garden" is missing from the collection');
+const featuredCover = resolveLocalImage(featured.data.images[0].src) ?? pondImage;
+const featuredAlt = featured.data.images[0].alt ?? featured.data.title;
+
+// A strip of the other photos from that garden: the site's best asset, and
+// until now only one of them appeared on the home page.
+const mosaic = [
+  {
+    src: pergolaImage,
+    alt: 'A block-paved path running beneath a pergola hung with purple wisteria',
+  },
+  { src: foxgloveImage, alt: 'A pink foxglove rising above spikes of purple salvia' },
+  { src: rosesImage, alt: 'Two apricot roses in full bloom with coral buds opening below them' },
+  { src: borderImage, alt: 'Steely-blue sea holly and scarlet climbing roses in a summer border' },
+  { src: dragonflyImage, alt: 'A dragonfly with amber-veined wings resting beside the pond' },
+];
+
+const services = [
+  {
+    title: 'Garden design',
+    blurb:
+      'A layout that suits how you want to use the space — structure, paths and planting that work together rather than fight each other.',
+    includes: 'a visit, a sketched plan, and a planting list you can keep.',
+    Icon: IconLeaf,
+  },
+  {
+    title: 'Planting & borders',
+    blurb:
+      'Borders built for year-round interest, with plants chosen to thrive in your soil and light rather than just look good at the garden centre.',
+    includes: 'plant sourcing, soil preparation and the planting itself.',
+    Icon: IconTrowel,
+  },
+  {
+    title: 'Ongoing care',
+    blurb:
+      'Regular visits to keep a garden looking its best — pruning, feeding, dividing and the hundred small jobs a season asks for.',
+    includes: 'a visit schedule that fits the garden, not the calendar.',
+    Icon: IconWateringCan,
+  },
+];
+
+// DRAFT copy for Sandy to confirm: written to be true of how any garden
+// designer works, not as a claim about a specific process she has agreed to.
+const steps = [
+  {
+    title: 'A chat about your garden',
+    body: 'We walk the space together and talk about how you use it, what you love, and what gets in the way.',
+  },
+  {
+    title: 'A plan you can picture',
+    body: 'A sketched layout and a planting list, so you can see the idea — and change it — before anything is dug.',
+  },
+  {
+    title: 'The work, and the care after',
+    body: 'Planting done properly, then help settling it in. A new garden needs a season or two of looking after.',
+  },
+];
 ---
 
 <BaseLayout title="Home">
-  <section
-    class="relative flex items-center justify-center min-h-[70vh] bg-forest text-white text-center px-6 overflow-hidden"
-  >
+  <section class="relative flex items-end min-h-[85svh] bg-forest text-white overflow-hidden">
     {
       /* Full-bleed hero photo. Eager + high priority because it's the LCP
          element — the first thing seen — so it must not lazy-load. `<Picture>`
          emits responsive, optimised sources; the `bg-forest` on the section is
          what the a11y sweep measures the text against, so contrast holds no
          matter what the photo is doing behind the scrim. A gentle saturation
-         lift makes the garden's colour pop. */
+         lift makes the garden's colour pop; `.hero-photo` adds the slow drift
+         from global.css. */
     }
-    <Picture
-      src={pondImage}
-      formats={['avif', 'webp']}
-      alt=""
-      aria-hidden="true"
-      loading="eager"
-      fetchpriority="high"
-      quality={55}
-      widths={[640, 960, 1280, 1600]}
-      sizes="100vw"
-      class="absolute inset-0 h-full w-full object-cover saturate-[1.15]"
-    />
+    <div class="hero-photo absolute inset-0">
+      <Picture
+        src={pondImage}
+        formats={['avif', 'webp']}
+        alt=""
+        aria-hidden="true"
+        loading="eager"
+        fetchpriority="high"
+        quality={55}
+        widths={[640, 960, 1280, 1600, 2000]}
+        sizes="100vw"
+        class="h-full w-full object-cover saturate-[1.15]"
+      />
+    </div>
     {
-      /* Spotlight scrim: a neutral (not green) darkening concentrated behind the
-         centred text, fading to near-clear at the edges — so the text stays
-         legible while the photo keeps its real colour. A flat green tint muted
-         everything and read as washed-out. */
+      /* Two scrims. A vertical one darkens the bottom-left where the text sits
+         and fades to clear at the top, so the wisteria keeps its real colour;
+         the second dissolves the photo's bottom edge into the page background
+         rather than cutting it off with a hard line. */
     }
     <div
-      class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.6)_0%,rgba(0,0,0,0.15)_65%)]"
+      class="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.72)_0%,rgba(0,0,0,0.35)_45%,rgba(0,0,0,0.05)_100%)]"
     >
     </div>
-    <div class="relative max-w-2xl">
-      <h1 class="font-display text-4xl sm:text-5xl mb-4 [text-shadow:0_1px_12px_rgba(0,0,0,0.5)]">
-        Gardens that feel alive
+    <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-paper to-transparent"></div>
+
+    <div class="relative w-full max-w-6xl mx-auto px-6 pb-24 pt-32 sm:pb-32">
+      <p
+        class="text-xs sm:text-sm uppercase tracking-[0.2em] text-white/85 mb-5 [text-shadow:0_1px_8px_rgba(0,0,0,0.5)]"
+      >
+        Garden design &amp; planting · {BUSINESS.areaServed}
+      </p>
+      <h1
+        class="font-display text-5xl sm:text-7xl leading-[1.05] max-w-3xl text-balance mb-6 [text-shadow:0_2px_16px_rgba(0,0,0,0.5)]"
+      >
+        Gardens that feel <em class="italic font-light">alive</em>
       </h1>
-      <p class="text-lg text-white mb-8 [text-shadow:0_1px_10px_rgba(0,0,0,0.55)]">
+      <p
+        class="text-lg sm:text-xl text-white/90 max-w-xl text-pretty mb-10 [text-shadow:0_1px_10px_rgba(0,0,0,0.55)]"
+      >
         Thoughtful garden design, planting and care — from wildlife ponds and wisteria-clad pergolas
         to borders layered for colour through every season.
       </p>
-      <a
-        href="/contact/"
-        class="inline-block bg-white text-forest px-6 py-3 rounded-full font-medium hover:bg-earth-light transition-colors"
-      >
-        Get in touch
-      </a>
+      <div class="flex flex-wrap gap-3">
+        <a
+          href="/contact/"
+          class="inline-block bg-white text-forest px-7 py-3 rounded-full font-medium hover:bg-moss transition-colors"
+        >
+          Get in touch
+        </a>
+        <a
+          href="/portfolio/"
+          class="inline-block border border-white/70 text-white px-7 py-3 rounded-full font-medium hover:bg-white/15 transition-colors backdrop-blur-sm"
+        >
+          See the work
+        </a>
+      </div>
     </div>
   </section>
 
-  <section class="max-w-5xl mx-auto px-6 py-16 grid sm:grid-cols-3 gap-8 text-center">
-    <div data-reveal>
-      <h2 class="font-display text-xl mb-2">Garden design</h2>
-      <p class="text-forest/80 text-sm">
-        A layout that suits how you want to use the space — structure, paths and planting that work
-        together.
-      </p>
+  {
+    /* Photo strip. Near the top of the page, so deliberately not revealed —
+       it should be there the moment the hero scrolls, not fade in after it.
+       On a phone it sits just below the fold, close enough that the browser
+       fetches it during the initial load regardless of `loading="lazy"`, so
+       the thumbnails are kept small (quality 55, nothing above 640px): every
+       byte here is a byte the hero — the largest paint — waits behind. */
+  }
+  <section class="max-w-6xl mx-auto px-6 -mt-2" aria-label="Photos from recent work">
+    <ul class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      {
+        mosaic.map((photo, index) => (
+          <li class:list={[index === 4 && 'hidden sm:block']}>
+            <a
+              href="/portfolio/nicks-garden/"
+              class="group block overflow-hidden rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
+            >
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                widths={[360, 480, 640]}
+                sizes="(min-width: 640px) 18vw, 45vw"
+                quality={55}
+                loading="lazy"
+                decoding="async"
+                class="w-full aspect-[4/5] object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="mt-4 text-sm text-forest/80 text-right">
+      <a href="/portfolio/" class="underline underline-offset-4 hover:text-forest"
+        >View the portfolio &rarr;</a
+      >
+    </p>
+  </section>
+
+  <section class="max-w-6xl mx-auto px-6 py-20 sm:py-24" aria-labelledby="services-heading">
+    <div class="max-w-2xl mb-10">
+      <p class="text-sm uppercase tracking-widest text-forest-light mb-3">What I do</p>
+      <h2 id="services-heading" class="font-display text-3xl sm:text-4xl text-balance">
+        From a first sketch to a garden that looks after itself
+      </h2>
     </div>
-    <div data-reveal>
-      <h2 class="font-display text-xl mb-2">Planting &amp; borders</h2>
-      <p class="text-forest/80 text-sm">
-        Borders built for year-round interest, chosen to thrive in your soil and light.
-      </p>
+    <div class="grid sm:grid-cols-3 gap-6" data-reveal-stagger>
+      {
+        services.map(({ Icon, ...service }) => (
+          <ServiceCard {...service}>
+            <Icon />
+          </ServiceCard>
+        ))
+      }
     </div>
-    <div data-reveal>
-      <h2 class="font-display text-xl mb-2">Ongoing care</h2>
-      <p class="text-forest/80 text-sm">
-        Regular maintenance to keep a garden looking its best, season after season.
-      </p>
+  </section>
+
+  <section class="bg-moss/60 py-20 sm:py-24" aria-labelledby="featured-heading">
+    <div
+      class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-10 md:gap-16 items-center"
+      data-reveal
+    >
+      <a
+        href={`/portfolio/${featured.id}/`}
+        class="group block overflow-hidden rounded-2xl shadow-xl shadow-forest/10 md:order-2"
+      >
+        <Image
+          src={featuredCover}
+          alt={featuredAlt}
+          widths={[600, 900, 1200]}
+          sizes="(min-width: 768px) 45vw, 92vw"
+          quality={60}
+          loading="lazy"
+          class="w-full aspect-[4/5] object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+      </a>
+      <div class="md:order-1">
+        <p class="text-sm uppercase tracking-widest text-forest-light mb-3">Featured project</p>
+        <h2 id="featured-heading" class="font-display text-3xl sm:text-4xl text-balance mb-4">
+          {featured.data.title}
+        </h2>
+        <p class="text-forest/80 text-pretty mb-8 max-w-prose">{featured.data.summary}</p>
+        <a
+          href={`/portfolio/${featured.id}/`}
+          class="inline-block bg-forest text-white px-6 py-3 rounded-full font-medium hover:bg-forest-light transition-colors"
+        >
+          View the project &rarr;
+        </a>
+      </div>
     </div>
+  </section>
+
+  <section class="max-w-6xl mx-auto px-6 py-20 sm:py-24" aria-labelledby="process-heading">
+    <div class="max-w-2xl mb-10">
+      <p class="text-sm uppercase tracking-widest text-forest-light mb-3">How it works</p>
+      <h2 id="process-heading" class="font-display text-3xl sm:text-4xl text-balance">
+        Three steps, and no surprises
+      </h2>
+    </div>
+    <ol class="grid sm:grid-cols-3 gap-8" data-reveal-stagger>
+      {
+        steps.map((step, index) => (
+          <li class="relative pl-14" data-reveal>
+            <span
+              class="absolute left-0 top-0 w-10 h-10 rounded-full border border-forest/30 flex items-center justify-center font-display text-lg text-forest"
+              aria-hidden="true"
+            >
+              {index + 1}
+            </span>
+            <h3 class="font-display text-xl mb-2 text-balance">{step.title}</h3>
+            <p class="text-forest/80 text-pretty">{step.body}</p>
+          </li>
+        ))
+      }
+    </ol>
   </section>
 
   <!-- Renders nothing until the testimonials collection has entries. -->
   <Testimonials />
 
-  <!-- The hero is deliberately not revealed: it is above the fold and the LCP
-       element, so fading it in would delay the largest paint to win nothing. -->
-  <section class="bg-earth-light/20 py-16 text-center px-6">
-    <div class="max-w-2xl mx-auto" data-reveal>
-      <Image
-        src={pondImage}
-        alt="A wildlife pond edged with grasses and irises, a wisteria-draped pergola behind it and a weeping red acer on a pebble bank"
-        widths={[600, 900]}
-        sizes="(min-width: 640px) 42rem, 92vw"
-        loading="lazy"
-        class="w-full rounded-lg mb-8 aspect-[3/2] object-cover"
-      />
-      <h2 class="font-display text-2xl mb-4">See the work</h2>
-      <p class="text-forest/80 mb-6">
-        A look at recent projects, including Nick's Garden — a wildlife garden built around a
-        natural pond.
-      </p>
-      <a href="/portfolio/" class="underline hover:text-forest-light">View the portfolio &rarr;</a>
-    </div>
-  </section>
+  <CtaBand />
 </BaseLayout>

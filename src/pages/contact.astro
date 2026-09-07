@@ -10,98 +10,158 @@ const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xojgnvrd';
 // `_next` must be absolute, so derive it from the configured `site` rather than
 // hardcoding the host in two places.
 const thanksUrl = new URL('/contact/thanks/', Astro.site).href;
+
+const fieldClass =
+  'w-full bg-white border border-earth-light/60 rounded-lg px-4 py-3 text-forest placeholder:text-forest/40 focus:outline-none focus:border-forest-light focus:ring-2 focus:ring-forest-light/40 transition';
 ---
 
-<BaseLayout title="Contact">
+<BaseLayout
+  title="Contact"
+  description={`Get in touch with ${BUSINESS.name} about garden design, planting or ongoing care in ${BUSINESS.areaServed}.`}
+>
   <LocalBusinessSchema slot="head" />
-  <section class="max-w-2xl mx-auto px-6 py-16">
-    <h1 class="font-display text-3xl mb-2">Contact</h1>
-    <p class="text-forest/80 mb-8">
-      Get in touch about a project — or call/email directly if that's easier.
-    </p>
+  <section class="max-w-6xl mx-auto px-6 pt-16 sm:pt-20 pb-20 sm:pb-24">
+    <div class="max-w-2xl mb-12">
+      <p class="text-sm uppercase tracking-widest text-forest-light mb-3">Contact</p>
+      <h1 class="font-display text-4xl sm:text-5xl text-balance mb-4">
+        Let's talk about your garden
+      </h1>
+      <p class="text-forest/80 text-lg text-pretty">
+        Tell me a little about the space and what you'd like from it, or email directly if that's
+        easier.
+      </p>
+    </div>
 
-    <!--
-      Progressive enhancement. The markup is a real HTML POST to Formspree, so
-      it works with no JavaScript — that path just lands on Formspree's own
-      confirmation page. The script at the end of this file intercepts the
-      submit, posts via `fetch`, and sends the visitor to our own
-      /contact/thanks/ page instead. It's a few hundred hand-rolled bytes, not
-      Formspree's SDK, and if the request fails for any reason it falls straight
-      back to the plain POST — so the form can't be broken by the script.
-
-      This matters because on Formspree's free plan the `_next` redirect below is
-      ignored and every submission lands on their branded page; doing the
-      redirect ourselves is what actually keeps people on her site.
-    -->
-    <form id="contact-form" class="space-y-4" method="POST" action={FORMSPREE_ENDPOINT}>
-      <!-- Without this, every enquiry arrives titled "New submission". -->
-      <input type="hidden" name="_subject" value="New enquiry from the website" />
-      <!-- Return to our own thank-you page instead of Formspree's branded one. -->
-      <input type="hidden" name="_next" value={thanksUrl} />
-      <div>
-        <label for="name" class="block text-sm font-medium mb-1">Name</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          required
-          class="w-full border border-earth-light/60 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-forest-light"
-        />
-      </div>
-      <div>
-        <label for="email" class="block text-sm font-medium mb-1">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          required
-          class="w-full border border-earth-light/60 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-forest-light"
-        />
-      </div>
-      <div>
-        <label for="message" class="block text-sm font-medium mb-1">Message</label>
-        <textarea
-          id="message"
-          name="message"
-          rows="5"
-          required
-          class="w-full border border-earth-light/60 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-forest-light"
-        ></textarea>
-      </div>
-
+    <div class="grid md:grid-cols-[3fr_2fr] gap-10 md:gap-16 items-start">
       <!--
-        Honeypot: off-screen for real users, bots fill it in. The name `_gotcha`
-        is Formspree's own convention — they discard any submission where it is
-        non-empty, so the filtering happens server-side rather than this field
-        just sitting here inert. `tabindex="-1"` keeps it out of the tab order,
-        which is also what makes the `aria-hidden` wrapper legitimate.
+        Progressive enhancement. The markup is a real HTML POST to Formspree, so
+        it works with no JavaScript — that path just lands on Formspree's own
+        confirmation page. The script at the end of this file intercepts the
+        submit, posts via `fetch`, and sends the visitor to our own
+        /contact/thanks/ page instead. It's a few hundred hand-rolled bytes, not
+        Formspree's SDK, and if the request fails for any reason it falls straight
+        back to the plain POST — so the form can't be broken by the script.
+
+        This matters because on Formspree's free plan the `_next` redirect below is
+        ignored and every submission lands on their branded page; doing the
+        redirect ourselves is what actually keeps people on her site.
       -->
-      <div class="absolute -left-[9999px]" aria-hidden="true">
-        <label for="company">Company</label>
-        <input type="text" id="company" name="_gotcha" tabindex="-1" autocomplete="off" />
-      </div>
+      <form id="contact-form" class="space-y-5" method="POST" action={FORMSPREE_ENDPOINT}>
+        <!-- Without this, every enquiry arrives titled "New submission". -->
+        <input type="hidden" name="_subject" value="New enquiry from the website" />
+        <!-- Return to our own thank-you page instead of Formspree's branded one. -->
+        <input type="hidden" name="_next" value={thanksUrl} />
 
-      <button
-        type="submit"
-        class="bg-forest text-white px-6 py-3 rounded-full font-medium hover:bg-forest-light transition-colors"
-      >
-        Send message
-      </button>
-    </form>
+        <div class="grid sm:grid-cols-2 gap-5">
+          <div>
+            <label for="name" class="block text-sm font-medium mb-1.5">Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              autocomplete="name"
+              class={fieldClass}
+            />
+          </div>
+          <div>
+            <label for="email" class="block text-sm font-medium mb-1.5">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              autocomplete="email"
+              class={fieldClass}
+            />
+          </div>
+        </div>
 
-    <div class="mt-10 pt-8 border-t border-earth-light/40 text-forest/80 text-sm">
-      <p>Prefer to {BUSINESS.telephoneDisplay ? 'call or email' : 'email'} directly?</p>
-      {
-        BUSINESS.telephoneDisplay && (
-          <p class="mt-1">
-            Phone:{' '}
-            <a href={`tel:${BUSINESS.telephone}`} class="underline">
-              {BUSINESS.telephoneDisplay}
+        <div>
+          <label for="service" class="block text-sm font-medium mb-1.5">
+            What can I help with? <span class="font-normal text-forest/80">(optional)</span>
+          </label>
+          <select id="service" name="service" class={fieldClass}>
+            <option value="">Choose one…</option>
+            <option value="Garden design">Garden design</option>
+            <option value="Planting and borders">Planting &amp; borders</option>
+            <option value="Ongoing care">Ongoing care</option>
+            <option value="Not sure yet">Not sure yet</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="message" class="block text-sm font-medium mb-1.5">Message</label>
+          <textarea
+            id="message"
+            name="message"
+            rows="6"
+            required
+            placeholder="Where the garden is, roughly how big, and what you'd like to change…"
+            class={fieldClass}></textarea>
+        </div>
+
+        <!--
+          Honeypot: off-screen for real users, bots fill it in. The name `_gotcha`
+          is Formspree's own convention — they discard any submission where it is
+          non-empty, so the filtering happens server-side rather than this field
+          just sitting here inert. `tabindex="-1"` keeps it out of the tab order,
+          which is also what makes the `aria-hidden` wrapper legitimate.
+        -->
+        <div class="absolute -left-[9999px]" aria-hidden="true">
+          <label for="company">Company</label>
+          <input type="text" id="company" name="_gotcha" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <button
+          type="submit"
+          class="bg-forest text-white px-7 py-3 rounded-full font-medium hover:bg-forest-light transition-colors"
+        >
+          Send message
+        </button>
+      </form>
+
+      <aside class="bg-moss/70 rounded-2xl p-7 sm:p-8 space-y-6 md:sticky md:top-24">
+        <div>
+          <h2 class="font-display text-2xl mb-2">
+            Prefer to {BUSINESS.telephoneDisplay ? 'call or email' : 'email'}?
+          </h2>
+          {
+            BUSINESS.telephoneDisplay && (
+              <p class="text-forest/80">
+                <a href={`tel:${BUSINESS.telephone}`} class="underline underline-offset-4">
+                  {BUSINESS.telephoneDisplay}
+                </a>
+              </p>
+            )
+          }
+          <p class="text-forest/80 break-words">
+            <a href={`mailto:${BUSINESS.email}`} class="underline underline-offset-4">
+              {BUSINESS.email}
             </a>
           </p>
-        )
-      }
-      <p>Email: <a href={`mailto:${BUSINESS.email}`} class="underline">{BUSINESS.email}</a></p>
+        </div>
+
+        <dl class="space-y-4 text-sm">
+          <div>
+            <dt class="font-medium mb-1">Where I work</dt>
+            <dd class="text-forest/80">{BUSINESS.areaServed}.</dd>
+          </div>
+          <div>
+            <dt class="font-medium mb-1">When you'll hear back</dt>
+            <dd class="text-forest/80">
+              I read every enquiry personally and aim to reply within a couple of working days.
+            </dd>
+          </div>
+          <div>
+            <dt class="font-medium mb-1">Helpful to include</dt>
+            <dd class="text-forest/80">
+              Roughly how big the garden is, what you'd like to change, and a photo or two if you
+              have them — you can send those once I reply.
+            </dd>
+          </div>
+        </dl>
+      </aside>
     </div>
   </section>
 </BaseLayout>

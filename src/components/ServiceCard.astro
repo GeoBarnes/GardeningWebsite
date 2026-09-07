@@ -1,0 +1,26 @@
+---
+// One of the three services on the home page. The icon comes in through the
+// default slot so the card owns none of the artwork; `includes` is the short
+// "what you actually get" line that turns a heading into a promise.
+interface Props {
+  title: string;
+  blurb: string;
+  includes: string;
+}
+
+const { title, blurb, includes } = Astro.props;
+---
+
+<article
+  class="h-full rounded-2xl border border-earth-light/30 bg-white/70 p-8 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-forest/5"
+  data-reveal
+>
+  <div class="mb-5 text-forest-light">
+    <slot />
+  </div>
+  <h3 class="font-display text-2xl mb-2 text-balance">{title}</h3>
+  <p class="text-forest/80 text-pretty mb-4">{blurb}</p>
+  <p class="text-sm text-forest/80 border-t border-earth-light/30 pt-4">
+    <span class="font-medium text-forest">Includes:</span>{' '}{includes}
+  </p>
+</article>

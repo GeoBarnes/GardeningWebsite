@@ -3,9 +3,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="Page not found">
-  <section class="max-w-2xl mx-auto px-6 py-24 text-center">
-    <h1 class="font-display text-3xl mb-4">Page not found</h1>
-    <p class="text-forest/80 mb-8">The page you're looking for doesn't exist.</p>
-    <a href="/" class="underline hover:text-forest-light">Back to home &rarr;</a>
+  <section class="max-w-2xl mx-auto px-6 py-24 sm:py-32 text-center">
+    <p class="text-sm uppercase tracking-widest text-forest-light mb-4">404</p>
+    <h1 class="font-display text-4xl sm:text-5xl text-balance mb-4">Page not found</h1>
+    <p class="text-forest/80 text-lg text-pretty mb-10">
+      Looks like this path has grown over. The page you're after may have moved, or the link may be
+      out of date — try one of these instead.
+    </p>
+    <nav aria-label="Suggested pages" class="flex flex-wrap justify-center gap-3">
+      <a
+        href="/"
+        class="inline-block bg-forest text-white px-6 py-3 rounded-full font-medium hover:bg-forest-light transition-colors"
+      >
+        Back to home
+      </a>
+      <a
+        href="/portfolio/"
+        class="inline-block border border-forest/30 px-6 py-3 rounded-full font-medium hover:bg-moss transition-colors"
+      >
+        See the portfolio
+      </a>
+      <a
+        href="/contact/"
+        class="inline-block border border-forest/30 px-6 py-3 rounded-full font-medium hover:bg-moss transition-colors"
+      >
+        Get in touch
+      </a>
+    </nav>
   </section>
 </BaseLayout>

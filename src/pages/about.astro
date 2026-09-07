@@ -1,36 +1,109 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import LocalBusinessSchema from '../components/LocalBusinessSchema.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { BUSINESS } from '../config';
+import profileImage from '../assets/about/profile-placeholder.jpeg';
+
+// DRAFT copy for Sandy to edit. Nothing below is a verified fact beyond the
+// service area in config: no years of experience, qualifications or client
+// numbers have been claimed, and none should be added without her say-so.
+const expectations = [
+  'A visit to walk the space together before any plan is drawn.',
+  'A sketched layout and planting list you can see — and change — before anything is dug.',
+  'Plants chosen for your soil and light, not just for how they look on the day.',
+  'Honesty about what a garden will need from you to keep looking after itself.',
+];
 ---
 
-<BaseLayout title="About">
+<BaseLayout
+  title="About"
+  description={`About ${BUSINESS.name} — garden design, planting and care in ${BUSINESS.areaServed}.`}
+>
   <LocalBusinessSchema slot="head" />
-  <section class="max-w-3xl mx-auto px-6 py-16">
-    <h1 class="font-display text-3xl mb-6">About</h1>
+  <section class="max-w-6xl mx-auto px-6 pt-16 sm:pt-20 pb-20 sm:pb-24">
+    <div class="grid md:grid-cols-[2fr_3fr] gap-10 md:gap-16 items-start">
+      <div class="md:sticky md:top-24">
+        <Image
+          src={profileImage}
+          alt="Placeholder for a photo of Sandy in the garden"
+          widths={[400, 640, 800]}
+          sizes="(min-width: 768px) 30vw, 92vw"
+          loading="eager"
+          class="w-full max-w-sm md:max-w-none aspect-[4/5] object-cover rounded-2xl shadow-xl shadow-forest/10"
+        />
+        <dl class="mt-6 text-sm grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-forest/80">
+          <dt class="font-medium text-forest">Based in</dt>
+          <dd>{BUSINESS.areaServed}</dd>
+          <dt class="font-medium text-forest">Email</dt>
+          <dd>
+            <a href={`mailto:${BUSINESS.email}`} class="underline underline-offset-4">
+              {BUSINESS.email}
+            </a>
+          </dd>
+        </dl>
+      </div>
 
-    <img
-      src="https://placehold.co/800x600/8a7a63/ffffff?text=Profile+Photo"
-      alt="Placeholder profile photo"
-      width="800"
-      height="600"
-      class="w-full max-w-xs rounded-lg mb-8 float-none sm:float-right sm:ml-8 sm:mb-4"
-    />
+      <div>
+        <p class="text-sm uppercase tracking-widest text-forest-light mb-3">About</p>
+        <h1 class="font-display text-4xl sm:text-5xl text-balance mb-8">
+          Hello, I'm Sandy — I make gardens people want to be in
+        </h1>
 
-    <p class="mb-4 text-forest/80 leading-relaxed">
-      Placeholder introduction paragraph — replace with a first-person profile written in her own
-      voice. Cover how she got into gardening, her style or specialities, and what clients can
-      expect from working with her.
-    </p>
-    <p class="mb-4 text-forest/80 leading-relaxed">
-      Placeholder second paragraph — mention service area, experience, and anything that builds
-      trust (qualifications, years of practice, favourite kinds of projects).
-    </p>
+        <!-- DRAFT: first-person bio for Sandy to rewrite in her own words. -->
+        <div class="text-lg text-forest/80 leading-relaxed text-pretty space-y-5">
+          <p>
+            I've been gardening for the love of it for a long time, and I'm now doing it for other
+            people too. My own garden taught me most of what I know: what actually thrives in
+            Northamptonshire clay, which plants earn their space through more than one season, and
+            how much a garden gives back when it's built for wildlife as well as for people.
+          </p>
+          <p>
+            The gardens I make lean towards the generous and the slightly wild — ponds with soft,
+            planted margins, pergolas that something is always climbing, and borders layered so
+            there's colour from the first bulbs to the last seed heads. Structure underneath, so it
+            never tips into a mess.
+          </p>
+          <p>
+            I work with people across {BUSINESS.areaServed}: new gardens, tired ones, and the
+            in-between kind that just needs a plan and a few good weekends.
+          </p>
+        </div>
 
-    <a
-      href="/contact/"
-      class="inline-block mt-4 bg-forest text-white px-6 py-3 rounded-full font-medium hover:bg-forest-light transition-colors"
-    >
-      Get in touch
-    </a>
+        <blockquote
+          class="my-10 pl-6 border-l-2 border-clay font-display text-2xl sm:text-3xl text-forest text-balance"
+        >
+          A good garden should look better in its third year than on the day it was planted.
+        </blockquote>
+
+        <h2 class="font-display text-2xl mb-4">What to expect</h2>
+        <ul class="space-y-3 text-forest/80 text-pretty mb-10">
+          {
+            expectations.map((item) => (
+              <li class="flex gap-3">
+                <span
+                  class="mt-2 w-1.5 h-1.5 rounded-full bg-forest-light shrink-0"
+                  aria-hidden="true"
+                />
+                <span>{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <a
+          href="/contact/"
+          class="inline-block bg-forest text-white px-7 py-3 rounded-full font-medium hover:bg-forest-light transition-colors"
+        >
+          Get in touch
+        </a>
+      </div>
+    </div>
   </section>
+
+  <CtaBand
+    heading="Shall we have a look at your garden?"
+    body="The first step is always a visit and a chat. No plan, no pressure — just a walk round the space and what you'd like from it."
+  />
 </BaseLayout>

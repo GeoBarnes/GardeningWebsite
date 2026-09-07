@@ -1,43 +1,146 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BeforeAfterSlider from '../../components/BeforeAfterSlider.astro';
 import ProjectGallery from '../../components/ProjectGallery.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { resolveLocalImage } from '../../lib/localImages';
 
 export async function getStaticPaths() {
-  const projects = await getCollection('projects');
-  return projects.map((project) => ({
+  // Newest first, matching the portfolio grid, so "next" always moves the
+  // same direction as reading down the index page.
+  const projects = (await getCollection('projects')).sort(
+    (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+  );
+  return projects.map((project, index) => ({
     params: { id: project.id },
-    props: { project },
+    props: {
+      project,
+      prev: projects[index - 1] ?? null,
+      next: projects[index + 1] ?? null,
+    },
   }));
 }
 
-const { project } = Astro.props;
+const { project, prev, next } = Astro.props;
 const { Content } = await render(project);
+
+const cover = project.data.images[0];
+const coverAsset = resolveLocalImage(cover.src);
+const coverAlt = cover.alt ?? project.data.title;
+const when = project.data.date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+// Each project shares its own cover in link previews rather than the site-wide
+// default. Local assets go through the pipeline for a sensibly sized JPEG.
+const shareImage = coverAsset
+  ? (await getImage({ src: coverAsset, width: 1200, format: 'jpeg' })).src
+  : cover.src;
+
+const neighbourClass =
+  'group flex-1 rounded-2xl border border-earth-light/40 p-5 hover:bg-moss/60 transition-colors';
 ---
 
-<BaseLayout title={project.data.title} description={project.data.summary}>
-  <article class="max-w-3xl mx-auto px-6 py-16">
-    <a href="/portfolio/" class="text-sm underline hover:text-forest-light"
-      >&larr; Back to portfolio</a
-    >
-    <h1 class="font-display text-3xl mt-4 mb-2">{project.data.title}</h1>
-    <p class="text-forest/80 mb-8">{project.data.summary}</p>
-
-    {
-      project.data.beforeAfter && (
-        <BeforeAfterSlider
-          before={project.data.beforeAfter.before}
-          after={project.data.beforeAfter.after}
-          title={project.data.title}
-        />
-      )
-    }
-
-    <ProjectGallery images={project.data.images} title={project.data.title} />
-
-    <div class="text-forest/80 leading-relaxed [&>p]:mb-4">
-      <Content />
+<BaseLayout title={project.data.title} description={project.data.summary} image={shareImage}>
+  <article>
+    <!--
+      Cover. Eager — it is the LCP element — and wrapped in the same
+      `transition:name` as the portfolio card, so the photo morphs into place
+      on a client-side navigation instead of cutting.
+    -->
+    <div class="max-w-6xl mx-auto px-6 pt-8">
+      <div
+        class="overflow-hidden rounded-2xl shadow-xl shadow-forest/10"
+        transition:name={`project-${project.id}`}
+      >
+        {
+          coverAsset ? (
+            <Image
+              src={coverAsset}
+              alt={coverAlt}
+              widths={[800, 1200, 1600, 2000]}
+              sizes="(min-width: 1152px) 72rem, 92vw"
+              loading="eager"
+              fetchpriority="high"
+              class="w-full max-h-[70vh] object-cover aspect-[16/9] sm:aspect-[21/9]"
+            />
+          ) : (
+            <img
+              src={cover.src}
+              alt={coverAlt}
+              width={cover.width}
+              height={cover.height}
+              loading="eager"
+              class="w-full max-h-[70vh] object-cover aspect-[16/9] sm:aspect-[21/9]"
+            />
+          )
+        }
+      </div>
     </div>
+
+    <header class="max-w-3xl mx-auto px-6 pt-10 sm:pt-14">
+      <a
+        href="/portfolio/"
+        class="inline-flex items-center gap-1 text-sm text-forest/80 underline underline-offset-4 hover:text-forest"
+        >&larr; Back to portfolio</a
+      >
+      <p class="text-sm uppercase tracking-widest text-forest-light mt-8 mb-3">{when}</p>
+      <h1 class="font-display text-4xl sm:text-5xl text-balance mb-4">{project.data.title}</h1>
+      <p class="text-forest/80 text-lg text-pretty mb-10">{project.data.summary}</p>
+    </header>
+
+    <div class="max-w-5xl mx-auto px-6">
+      {
+        project.data.beforeAfter && (
+          <BeforeAfterSlider
+            before={project.data.beforeAfter.before}
+            after={project.data.beforeAfter.after}
+            title={project.data.title}
+          />
+        )
+      }
+
+      <ProjectGallery images={project.data.images} title={project.data.title} />
+    </div>
+
+    <div class="max-w-3xl mx-auto px-6 pb-16">
+      <div class="text-forest/80 text-lg leading-relaxed text-pretty [&>p]:mb-5">
+        <Content />
+      </div>
+    </div>
+
+    <nav class="max-w-5xl mx-auto px-6 pb-20 sm:pb-24" aria-label="More projects">
+      <div class="flex flex-col sm:flex-row gap-4">
+        {
+          prev && (
+            <a href={`/portfolio/${prev.id}/`} class={neighbourClass}>
+              <span class="block text-xs uppercase tracking-widest text-forest/80 mb-1">
+                &larr; Previous project
+              </span>
+              <span class="font-display text-lg group-hover:text-forest-light transition-colors">
+                {prev.data.title}
+              </span>
+            </a>
+          )
+        }
+        {
+          next && (
+            <a href={`/portfolio/${next.id}/`} class:list={[neighbourClass, 'sm:text-right']}>
+              <span class="block text-xs uppercase tracking-widest text-forest/80 mb-1">
+                Next project &rarr;
+              </span>
+              <span class="font-display text-lg group-hover:text-forest-light transition-colors">
+                {next.data.title}
+              </span>
+            </a>
+          )
+        }
+      </div>
+    </nav>
   </article>
+
+  <CtaBand
+    heading="Like the look of this?"
+    body="Every garden is different, but the way I work is the same: a visit, a plan you can picture, and planting that suits the place."
+  />
 </BaseLayout>
